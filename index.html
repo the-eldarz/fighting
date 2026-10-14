@@ -109,11 +109,6 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
 .switch.on::after{transform:translateX(18px)}
 .switch-row input[type=checkbox]{display:none}
 .settings-hint{margin-top:10px;font-size:11px;color:var(--muted);line-height:1.4}
-.accent-palette{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.accent-pick{aspect-ratio:1;border-radius:50%;border:2px solid transparent;cursor:pointer;
-  transition:.15s;position:relative}
-.accent-pick:hover{transform:scale(1.08)}
-.accent-pick.active{border-color:var(--text);box-shadow:0 0 0 3px var(--panel),0 0 0 5px var(--text)}
 .screen{position:fixed;top:var(--header-h);left:0;right:0;bottom:0;display:none;
   overflow:auto;padding-bottom:env(safe-area-inset-bottom)}
 .screen.active{display:block}
@@ -229,9 +224,9 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
 .field label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.3px}
 .field textarea{width:100%;padding:10px 12px;border-radius:10px;
   border:1.5px solid var(--line);background:var(--bg);color:var(--text);
-  font-family:inherit;font-size:14px;outline:none;transition:.15s}
+  font-family:inherit;font-size:14px;outline:none;transition:.15s;
+  resize:vertical;min-height:60px}
 .field textarea:focus{border-color:var(--accent);background:var(--panel)}
-.field textarea{resize:vertical;min-height:60px}
 .modal-actions{display:flex;gap:8px;margin-top:18px}
 .modal-actions .btn{flex:1;justify-content:center}
 #screenReader{position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;padding-bottom:0 !important;padding-top:0}
@@ -242,14 +237,13 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
 .rbar .rtitle{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;
   text-overflow:ellipsis;max-width:340px}
 .rbar .rsub{font-size:11.5px;color:var(--muted);white-space:nowrap}
-.stage{flex:1 1 auto;min-height:0;position:relative;overflow:auto;background:var(--stage);
-  display:grid;place-items:center;padding:24px;transition:background .25s;-webkit-overflow-scrolling:touch}
-#pageWrap{display:flex;align-items:center;justify-content:center;transform-origin:center;
-  animation:pageIn .35s cubic-bezier(.2,.9,.3,1);gap:2px}
-@keyframes pageIn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
-#pageWrap.animating{transition:transform .2s ease,opacity .2s ease}
+.stage{flex:1 1 auto;min-height:0;position:relative;overflow:hidden;background:var(--stage);
+  display:grid;place-items:center;padding:24px;transition:background .25s;
+  touch-action:none;user-select:none;-webkit-user-select:none}
+#pageWrap{display:flex;align-items:center;justify-content:center;gap:2px;
+  will-change:transform;transform-origin:0 0}
 #pageCanvas,#pageCanvas2{display:block;background:#fff;box-shadow:0 12px 40px rgba(0,0,0,.35);
-  border-radius:4px;will-change:transform,opacity}
+  border-radius:4px}
 #pageWrap.two-page #pageCanvas{box-shadow:-6px 12px 40px rgba(0,0,0,.4)}
 #pageWrap.two-page #pageCanvas2{box-shadow:6px 12px 40px rgba(0,0,0,.4)}
 .navzone{position:absolute;top:0;bottom:0;width:80px;cursor:pointer;z-index:6;
@@ -289,7 +283,9 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
   border:5px solid transparent;border-top-color:var(--text)}
 .bubble.show{opacity:1;transform:translateX(-50%) scale(1)}
 .loading{position:absolute;inset:0;display:grid;place-items:center;
-  color:rgba(255,255,255,.9);font-size:13.5px;font-weight:600;background:rgba(0,0,0,.35);z-index:8}
+  color:rgba(255,255,255,.9);font-size:13.5px;font-weight:600;background:rgba(0,0,0,.35);z-index:8;
+  opacity:0;transition:opacity .15s;pointer-events:none}
+.loading.show{opacity:1;pointer-events:auto}
 .spinner{width:38px;height:38px;border:3px solid rgba(255,255,255,.25);
   border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -332,28 +328,6 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
   opacity:0;transition:.3s;box-shadow:0 10px 30px rgba(0,0,0,.28);
   pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-#fxCanvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9998;display:none}
-.fx-overlay{position:fixed;inset:0;z-index:9997;display:none;align-items:center;justify-content:center;
-  pointer-events:none;background:radial-gradient(circle at center,rgba(15,155,142,.4),rgba(0,0,0,.6));
-  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
-.fx-overlay.show{display:flex;animation:fxFade 2.6s ease forwards}
-@keyframes fxFade{0%{opacity:0}12%{opacity:1}82%{opacity:1}100%{opacity:0}}
-.fx-text{text-align:center;font-family:var(--sans);transform-origin:center}
-.fx-overlay.show .fx-text{animation:fxPop 2.6s cubic-bezier(.2,1.4,.35,1) forwards}
-@keyframes fxPop{0%{transform:scale(.25) rotate(-20deg);opacity:0}
-  18%{transform:scale(1.18) rotate(4deg);opacity:1}
-  30%{transform:scale(.98) rotate(-2deg)}45%{transform:scale(1.06) rotate(1.5deg)}
-  60%{transform:scale(1) rotate(0)}100%{transform:scale(1) rotate(0);opacity:1}}
-.fx-line1{display:block;font-size:clamp(38px,11vw,76px);font-weight:900;
-  letter-spacing:6px;color:#fff;text-shadow:0 4px 30px rgba(0,0,0,.65),0 0 40px rgba(15,155,142,.6);
-  margin-bottom:10px;text-align:center}
-.fx-line2{display:block;font-size:clamp(110px,32vw,220px);font-weight:900;line-height:1;
-  letter-spacing:-6px;background:linear-gradient(135deg,#ffdd33 0%,#ff3366 45%,#9966ff 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 8px 40px rgba(255,80,150,.7));text-align:center}
-.cat-run{position:fixed;bottom:30px;font-size:60px;z-index:9997;pointer-events:none;
-  animation:catRun 3s linear forwards}
-@keyframes catRun{0%{left:-80px}100%{left:100vw}}
 .drop-overlay{position:fixed;inset:0;background:rgba(15,155,142,.14);backdrop-filter:blur(6px);
   z-index:200;display:none;align-items:center;justify-content:center;pointer-events:none}
 .drop-overlay.on{display:flex}
@@ -397,7 +371,7 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
 
 <header>
   <button class="icon-btn" id="btnBack" style="display:none" title="Назад">←</button>
-  <div class="logo" id="logo" title="Нажми меня 🎆">К</div>
+  <div class="logo" id="logo" title="Книги">К</div>
   <div class="brand">
     <span class="bt" id="brandTitle">Книги</span>
     <small id="brandSub">читайте и листайте учебники</small>
@@ -499,7 +473,7 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
     </div>
     <button class="navzone l" id="zonePrev">‹</button>
     <button class="navzone r" id="zoneNext">›</button>
-    <div class="loading" id="loading" style="display:none">
+    <div class="loading" id="loading">
       <div><div class="spinner"></div><div>Загрузка…</div></div>
     </div>
   </div>
@@ -558,10 +532,6 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
     </div>
   </div>
   <div class="settings-section">
-    <div class="settings-title">Цвет акцента</div>
-    <div class="accent-palette" id="accentPalette"></div>
-  </div>
-  <div class="settings-section">
     <div class="settings-title">Сортировка</div>
     <div class="seg-options" id="sortOpts">
       <button class="seg-opt" data-sort="date">Дата</button>
@@ -585,16 +555,25 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
     </label>
   </div>
   <div class="settings-section">
-    <div class="settings-title">Развлечения</div>
-    <label class="switch-row" for="setFun">
-      <div><div class="switch-label">Прикольные анимации</div>
-        <div class="switch-desc">Салют, пасхалки на страницах.</div></div>
-      <div class="switch" id="switchFun"></div>
-      <input type="checkbox" id="setFun">
+    <div class="settings-title">Жесты</div>
+    <label class="switch-row" for="setSwipeNav">
+      <div><div class="switch-label">Свайпы для страниц</div>
+        <div class="switch-desc">Перелистывание смахиванием одним пальцем.</div></div>
+      <div class="switch" id="switchSwipeNav"></div>
+      <input type="checkbox" id="setSwipeNav">
     </label>
-    <label class="switch-row" for="setSounds" style="margin-top:14px">
-      <div><div class="switch-label">Звуки</div>
-        <div class="switch-desc">Шорох страниц, дзынь.</div></div>
+    <label class="switch-row" for="setPinchZoom" style="margin-top:14px">
+      <div><div class="switch-label">Сенсорный зум</div>
+        <div class="switch-desc">Приближение двумя пальцами. Один палец — панорамирование.</div></div>
+      <div class="switch" id="switchPinchZoom"></div>
+      <input type="checkbox" id="setPinchZoom">
+    </label>
+  </div>
+  <div class="settings-section">
+    <div class="settings-title">Звуки</div>
+    <label class="switch-row" for="setSounds">
+      <div><div class="switch-label">Звуки листания</div>
+        <div class="switch-desc">Шорох страниц, дзынь при добавлении.</div></div>
       <div class="switch" id="switchSounds"></div>
       <input type="checkbox" id="setSounds">
     </label>
@@ -604,14 +583,6 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
     <button class="btn ghost" id="btnExport" style="width:100%;justify-content:center">💾 Экспорт настроек и закладок</button>
     <button class="btn ghost" id="btnImport" style="width:100%;justify-content:center;margin-top:8px">📥 Импорт из файла</button>
     <div class="settings-hint">Экспортируется JSON: настройки и закладки.</div>
-  </div>
-</div>
-
-<canvas id="fxCanvas"></canvas>
-<div class="fx-overlay" id="fxOverlay">
-  <div class="fx-text">
-    <span class="fx-line1" id="fxLine1">СИКСЕВЕН</span>
-    <span class="fx-line2" id="fxLine2">67</span>
   </div>
 </div>
 
@@ -641,32 +612,22 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
 
 /* ===== SETTINGS ===== */
 const THEMES=['light','dark','sepia','academy'];
-const ACCENTS=[
-  {name:'Бирюза',a:'#0f9b8e',b:'#0b6e66'},
-  {name:'Малина',a:'#e63570',b:'#a31754'},
-  {name:'Оранж',a:'#f97316',b:'#c2410c'},
-  {name:'Индиго',a:'#6366f1',b:'#4338ca'},
-  {name:'Изумруд',a:'#10b981',b:'#047857'},
-  {name:'Роза',a:'#ec4899',b:'#be185d'},
-  {name:'Графит',a:'#475569',b:'#1e293b'},
-  {name:'Золото',a:'#c9a961',b:'#a08346'}
-];
 const settings={
   themeIdx:+(localStorage.getItem('lib-theme')??0),
-  accentIdx:+(localStorage.getItem('lib-accent')??0),
   skipFirst:localStorage.getItem('lib-skip-first')==='1',
   twoPage:localStorage.getItem('lib-two-page')==='1',
+  swipeNav:localStorage.getItem('lib-swipe-nav')!=='0',
+  pinchZoom:localStorage.getItem('lib-pinch-zoom')!=='0',
   sort:localStorage.getItem('lib-sort')||'date',
-  fun:localStorage.getItem('lib-fun')!=='0',
   sounds:localStorage.getItem('lib-sounds')==='1'
 };
 function saveSettings(){
   localStorage.setItem('lib-theme',settings.themeIdx);
-  localStorage.setItem('lib-accent',settings.accentIdx);
   localStorage.setItem('lib-skip-first',settings.skipFirst?'1':'0');
   localStorage.setItem('lib-two-page',settings.twoPage?'1':'0');
+  localStorage.setItem('lib-swipe-nav',settings.swipeNav?'1':'0');
+  localStorage.setItem('lib-pinch-zoom',settings.pinchZoom?'1':'0');
   localStorage.setItem('lib-sort',settings.sort);
-  localStorage.setItem('lib-fun',settings.fun?'1':'0');
   localStorage.setItem('lib-sounds',settings.sounds?'1':'0');
 }
 function applyTheme(){
@@ -675,29 +636,11 @@ function applyTheme(){
   const meta=document.querySelector('meta[name="theme-color"]');
   if(meta)meta.content=getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#0f9b8e';
 }
-function applyAccent(){
-  const a=ACCENTS[settings.accentIdx]||ACCENTS[0];
-  document.documentElement.style.setProperty('--accent',a.a);
-  document.documentElement.style.setProperty('--accent-2',a.b);
-  document.querySelectorAll('.accent-pick').forEach(el=>el.classList.toggle('active',+el.dataset.ai===settings.accentIdx));
-}
-function renderAccentPalette(){
-  const el=document.getElementById('accentPalette');
-  el.innerHTML='';
-  ACCENTS.forEach((a,i)=>{
-    const d=document.createElement('div');
-    d.className='accent-pick';d.dataset.ai=i;
-    d.style.background=`linear-gradient(135deg,${a.a},${a.b})`;
-    d.title=a.name;
-    d.onclick=()=>{settings.accentIdx=i;saveSettings();applyAccent()};
-    el.appendChild(d);
-  });
-  applyAccent();
-}
 function syncSortUI(){document.querySelectorAll('#sortOpts .seg-opt').forEach(el=>el.classList.toggle('active',el.dataset.sort===settings.sort))}
 function syncSkipFirstUI(){document.getElementById('switchSkipFirst').classList.toggle('on',settings.skipFirst);document.getElementById('setSkipFirst').checked=settings.skipFirst}
 function syncTwoPageUI(){document.getElementById('switchTwoPage').classList.toggle('on',settings.twoPage);document.getElementById('setTwoPage').checked=settings.twoPage}
-function syncFunUI(){document.getElementById('switchFun').classList.toggle('on',settings.fun);document.getElementById('setFun').checked=settings.fun}
+function syncSwipeNavUI(){document.getElementById('switchSwipeNav').classList.toggle('on',settings.swipeNav);document.getElementById('setSwipeNav').checked=settings.swipeNav}
+function syncPinchZoomUI(){document.getElementById('switchPinchZoom').classList.toggle('on',settings.pinchZoom);document.getElementById('setPinchZoom').checked=settings.pinchZoom}
 function syncSoundsUI(){document.getElementById('switchSounds').classList.toggle('on',settings.sounds);document.getElementById('setSounds').checked=settings.sounds}
 
 /* ===== SOUNDS ===== */
@@ -707,10 +650,8 @@ function beep(freq,dur,type='sine',vol=.06){
   try{
     if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
     const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-    o.type=type;o.frequency.value=freq;
-    g.gain.value=vol;
-    o.connect(g);g.connect(audioCtx.destination);
-    o.start();
+    o.type=type;o.frequency.value=freq;g.gain.value=vol;
+    o.connect(g);g.connect(audioCtx.destination);o.start();
     g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
     o.stop(audioCtx.currentTime+dur);
   }catch(e){}
@@ -726,23 +667,15 @@ function saveBookmarks(b){localStorage.setItem(BM_STORE,JSON.stringify(b))}
 function getAllBookmarksFlat(){
   const all=getBookmarks();const out=[];
   for(const[k,v]of Object.entries(all)){for(const bm of v){out.push({bookId:k,...bm})}}
-  out.sort((a,b)=>b.date-a.date);
-  return out;
+  out.sort((a,b)=>b.date-a.date);return out;
 }
-function isBookmarked(bookId,page){
-  const all=getBookmarks();
-  return (all[bookId]||[]).some(b=>b.page===page);
-}
+function isBookmarked(bookId,page){const all=getBookmarks();return(all[bookId]||[]).some(b=>b.page===page)}
 function removeBookmark(bookId,page){
   const all=getBookmarks();if(!all[bookId])return;
   all[bookId]=all[bookId].filter(b=>b.page!==page);
-  if(!all[bookId].length)delete all[bookId];
-  saveBookmarks(all);
+  if(!all[bookId].length)delete all[bookId];saveBookmarks(all);
 }
-function getBookmarkNote(bookId,page){
-  const all=getBookmarks();const arr=all[bookId]||[];
-  const f=arr.find(b=>b.page===page);return f?f.note:'';
-}
+function getBookmarkNote(bookId,page){const all=getBookmarks();const arr=all[bookId]||[];const f=arr.find(b=>b.page===page);return f?f.note:''}
 
 /* ===== RECOMMENDED ===== */
 const REC_BOOKS=[
@@ -768,16 +701,11 @@ const REC_BOOKS=[
    url:'https://share.google/1F6fIuFWkL5AhfSlA',
    matchAny:['география','geografiya','geography','gladkiy','гладкий','nikolina','николина','polyarnaya','полярная'],theme:'geo'}
 ];
-
 function normMatch(s){return String(s||'').toLowerCase().replace(/\.pdf$/i,'').replace(/[^a-zа-яё0-9]+/gi,'')}
 function findMatchingSaved(books,rec){
   const terms=(rec.matchAny||[]).map(normMatch).filter(Boolean);
   if(!terms.length)return null;
-  for(const b of books){
-    const n=normMatch(b.name);
-    if(terms.some(t=>n.includes(t)))return b;
-  }
-  return null;
+  for(const b of books){const n=normMatch(b.name);if(terms.some(t=>n.includes(t)))return b}return null;
 }
 function phClass(rec){
   const map={soc:'soc',phys:'physics',eng:'english',russian:'russian',bio:'bio','bio-pro':'bio-pro',geo:'geo'};
@@ -793,16 +721,6 @@ btnInstall.addEventListener('click',async()=>{
   if(outcome==='accepted')toast('Спасибо! Установлено');deferredPrompt=null;btnInstall.style.display='none';
 });
 window.addEventListener('appinstalled',()=>{toast('Приложение установлено');btnInstall.style.display='none'});
-
-/* ===== SEASONAL LOGO ===== */
-function seasonalEmoji(){
-  const now=new Date();const m=now.getMonth();const d=now.getDate();
-  if(m===11||m<=1)return'❄';
-  if(m===5||m===6||m===7)return'☀';
-  if(m===8&&d===1)return'🔔';
-  return'К';
-}
-document.getElementById('logo').textContent=seasonalEmoji();
 
 /* ===== NAV ===== */
 let currentScreen='home';let lastScreenBeforeReader='mine';
@@ -849,19 +767,19 @@ settingsBackdrop.addEventListener('click',closeSettings);
 document.addEventListener('click',e=>{if(!settingsPop.classList.contains('open'))return;if(settingsPop.contains(e.target)||btnSettings.contains(e.target))return;closeSettings()});
 document.querySelectorAll('.theme-opt').forEach(el=>el.addEventListener('click',()=>{settings.themeIdx=+el.dataset.themeVal;saveSettings();applyTheme()}));
 document.querySelectorAll('#sortOpts .seg-opt').forEach(el=>el.addEventListener('click',()=>{settings.sort=el.dataset.sort;saveSettings();syncSortUI();renderAll()}));
-document.querySelector('label[for="setSkipFirst"]').addEventListener('click',e=>{e.preventDefault();settings.skipFirst=!settings.skipFirst;saveSettings();syncSkipFirstUI();if(state.pdf){if(settings.skipFirst&&state.page===1&&state.pdf.numPages>1)goToPage(2,1);else updatePageUI()}});
-document.querySelector('label[for="setTwoPage"]').addEventListener('click',e=>{e.preventDefault();settings.twoPage=!settings.twoPage;saveSettings();syncTwoPageUI();if(state.pdf)renderPage()});
-document.querySelector('label[for="setFun"]').addEventListener('click',e=>{e.preventDefault();settings.fun=!settings.fun;saveSettings();syncFunUI()});
+document.querySelector('label[for="setSkipFirst"]').addEventListener('click',e=>{e.preventDefault();settings.skipFirst=!settings.skipFirst;saveSettings();syncSkipFirstUI();if(state.pdf){if(settings.skipFirst&&state.page===1&&state.pdf.numPages>1)goToPage(2);else updatePageUI()}});
+document.querySelector('label[for="setTwoPage"]').addEventListener('click',e=>{e.preventDefault();settings.twoPage=!settings.twoPage;saveSettings();syncTwoPageUI();if(state.pdf){resetZoom();renderPage()}});
+document.querySelector('label[for="setSwipeNav"]').addEventListener('click',e=>{e.preventDefault();settings.swipeNav=!settings.swipeNav;saveSettings();syncSwipeNavUI()});
+document.querySelector('label[for="setPinchZoom"]').addEventListener('click',e=>{e.preventDefault();settings.pinchZoom=!settings.pinchZoom;saveSettings();syncPinchZoomUI();if(!settings.pinchZoom)resetZoom()});
 document.querySelector('label[for="setSounds"]').addEventListener('click',e=>{e.preventDefault();settings.sounds=!settings.sounds;saveSettings();syncSoundsUI()});
 
 /* ===== EXPORT / IMPORT ===== */
 document.getElementById('btnExport').onclick=()=>{
-  const data={
-    version:1,exportedAt:new Date().toISOString(),
-    settings:{theme:settings.themeIdx,accent:settings.accentIdx,skipFirst:settings.skipFirst,
-      twoPage:settings.twoPage,sort:settings.sort,fun:settings.fun,sounds:settings.sounds},
-    bookmarks:getBookmarks()
-  };
+  const data={version:1,exportedAt:new Date().toISOString(),
+    settings:{theme:settings.themeIdx,skipFirst:settings.skipFirst,
+      twoPage:settings.twoPage,swipeNav:settings.swipeNav,pinchZoom:settings.pinchZoom,
+      sort:settings.sort,sounds:settings.sounds},
+    bookmarks:getBookmarks()};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);const a=document.createElement('a');
   a.href=url;a.download='knigi-backup-'+new Date().toISOString().slice(0,10)+'.json';
@@ -875,16 +793,17 @@ document.getElementById('importInput').onchange=async e=>{
     const txt=await f.text();const d=JSON.parse(txt);
     if(d.settings){
       settings.themeIdx=d.settings.theme??settings.themeIdx;
-      settings.accentIdx=d.settings.accent??settings.accentIdx;
       settings.skipFirst=!!d.settings.skipFirst;
       settings.twoPage=!!d.settings.twoPage;
+      if(d.settings.swipeNav!==undefined)settings.swipeNav=!!d.settings.swipeNav;
+      if(d.settings.pinchZoom!==undefined)settings.pinchZoom=!!d.settings.pinchZoom;
       settings.sort=d.settings.sort||settings.sort;
-      settings.fun=d.settings.fun!==false;
       settings.sounds=!!d.settings.sounds;
     }
     if(d.bookmarks)saveBookmarks(d.bookmarks);
     saveSettings();
-    applyTheme();applyAccent();syncSortUI();syncSkipFirstUI();syncTwoPageUI();syncFunUI();syncSoundsUI();
+    applyTheme();syncSortUI();syncSkipFirstUI();syncTwoPageUI();
+    syncSwipeNavUI();syncPinchZoomUI();syncSoundsUI();
     renderAll();toast('Импорт завершён ✅',2600);
   }catch(err){console.error(err);toast('Ошибка импорта',2400)}
 };
@@ -912,14 +831,10 @@ function renderHome(books){
 const gridRec=document.getElementById('gridRec');
 const recCountEl=document.getElementById('recCount');
 function renderRecScreen(books){
-  gridRec.innerHTML='';
-  recCountEl.textContent=REC_BOOKS.length;
+  gridRec.innerHTML='';recCountEl.textContent=REC_BOOKS.length;
   const sorted=[...REC_BOOKS];
   if(settings.sort==='alpha')sorted.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ru',{sensitivity:'base'}));
-  for(const rec of sorted){
-    const m=findMatchingSaved(books,rec);
-    renderRecCard(rec,m);
-  }
+  for(const rec of sorted){const m=findMatchingSaved(books,rec);renderRecCard(rec,m)}
 }
 function renderRecCard(rec,matched){
   const card=document.createElement('div');
@@ -932,41 +847,26 @@ function renderRecCard(rec,matched){
   const hint=matched
     ?`<div class="hint ok">✓ Учебник уже в «Моих книгах»</div>`
     :`<div class="hint rec">Выберите файл на устройстве или скачайте по кнопке ниже.</div>`;
-
   let actions;
-  if (matched){
-    actions = `
-      <button class="btn ok" data-act="open">Читать</button>
-      <button class="icon-btn" data-act="delete" title="Удалить навсегда">🗑</button>
-    `;
-  } else {
-    actions = `
-      <button class="btn" data-act="pick">📁 Найти в файлах</button>
-      <button class="icon-btn" data-act="download" title="Скачать PDF">⬇</button>
-    `;
+  if(matched){
+    actions=`<button class="btn ok" data-act="open">Читать</button><button class="icon-btn" data-act="delete" title="Удалить навсегда">🗑</button>`;
+  }else{
+    actions=`<button class="btn" data-act="pick">📁 Найти в файлах</button><button class="icon-btn" data-act="download" title="Скачать PDF">⬇</button>`;
   }
-
   card.innerHTML=`
     <div class="cover" data-cover><div class="spine ${matched?'ok':'rec'}"></div>${cover}${badge}
       <div class="overlay">${matched?'Читать →':'Найти файл →'}</div></div>
     <div class="card-body"><h3>${esc(rec.name)}</h3>
       <div class="meta">${esc(meta)}</div>${hint}
       <div class="card-actions">${actions}</div></div>`;
-
-  const coverEl = card.querySelector('[data-cover]');
-  coverEl.onclick = ()=>{
-    if (matched) openBook(matched.id);
-    else pickFileForPreset(rec);
-  };
-
-  if (matched){
-    card.querySelector('[data-act="open"]').onclick = ()=> openBook(matched.id);
-    card.querySelector('[data-act="delete"]').onclick = ()=> deleteBookEverywhere(matched, rec);
-  } else {
-    card.querySelector('[data-act="pick"]').onclick = ()=> pickFileForPreset(rec);
-    card.querySelector('[data-act="download"]').onclick = ()=> downloadRec(rec);
+  card.querySelector('[data-cover]').onclick=()=>{matched?openBook(matched.id):pickFileForPreset(rec)};
+  if(matched){
+    card.querySelector('[data-act="open"]').onclick=()=>openBook(matched.id);
+    card.querySelector('[data-act="delete"]').onclick=()=>deleteBookEverywhere(matched,rec);
+  }else{
+    card.querySelector('[data-act="pick"]').onclick=()=>pickFileForPreset(rec);
+    card.querySelector('[data-act="download"]').onclick=()=>downloadRec(rec);
   }
-
   gridRec.appendChild(card);
 }
 
@@ -986,8 +886,7 @@ function renderMineScreen(books){
   gridMine.appendChild(add);
 }
 function renderSavedBook(b){
-  const card=document.createElement('div');
-  card.className='card';
+  const card=document.createElement('div');card.className='card';
   const cur=b.lastPage||1;const total=b.pages||1;
   const pct=total>1?Math.min(100,Math.round((cur/total)*100)):0;
   const progressHtml=cur>1?`
@@ -1007,7 +906,7 @@ function renderSavedBook(b){
       </div></div>`;
   card.querySelector('[data-cover]').onclick=()=>openBook(b.id);
   card.querySelector('[data-act="open"]').onclick=()=>openBook(b.id);
-  card.querySelector('[data-act="delete"]').onclick=()=> deleteBookEverywhere(b, null);
+  card.querySelector('[data-act="delete"]').onclick=()=>deleteBookEverywhere(b,null);
   gridMine.appendChild(card);
 }
 
@@ -1015,18 +914,15 @@ const gridBm=document.getElementById('gridBm');
 const bmCountEl=document.getElementById('bmCount');
 async function renderBookmarksScreen(books){
   const flat=getAllBookmarksFlat();
-  bmCountEl.textContent=flat.length;
-  gridBm.innerHTML='';
+  bmCountEl.textContent=flat.length;gridBm.innerHTML='';
   if(!flat.length){
     gridBm.innerHTML=`<div class="section-empty">Пока нет закладок.<br>Откройте книгу и нажмите 🔖 в шапке читалки.</div>`;
     return;
   }
   const byId={};for(const b of books)byId[b.id]=b;
   for(const bm of flat){
-    const book=byId[bm.bookId];
-    if(!book)continue;
-    const card=document.createElement('div');
-    card.className='card';
+    const book=byId[bm.bookId];if(!book)continue;
+    const card=document.createElement('div');card.className='card';
     card.innerHTML=`
       <div class="cover" data-cover>
         <div class="spine"></div>
@@ -1043,23 +939,16 @@ async function renderBookmarksScreen(books){
         </div></div>`;
     card.querySelector('[data-cover]').onclick=()=>openBookAt(book.id,bm.page);
     card.querySelector('[data-act="open"]').onclick=()=>openBookAt(book.id,bm.page);
-    card.querySelector('[data-act="del"]').onclick=()=>{
-      removeBookmark(bm.bookId,bm.page);
-      renderAll();toast('Закладка удалена');
-    };
+    card.querySelector('[data-act="del"]').onclick=()=>{removeBookmark(bm.bookId,bm.page);renderAll();toast('Закладка удалена')};
     gridBm.appendChild(card);
   }
 }
 
-/* ===== DELETE BOOK (из приложения + с диска) ===== */
+/* ===== DELETE BOOK ===== */
 async function deleteBookEverywhere(book, rec){
   const bookName = book.name || (rec && rec.name) || 'книга';
   if (!confirm('Удалить «'+bookName+'»?\n\nКнига будет удалена из приложения'+(book.fileHandle?' и с устройства':'')+'.')) return;
-
-  let fileDeleted = false;
-  let fileNote = '';
-
-  // Пытаемся удалить физический файл через File System Access API
+  let fileDeleted = false;let fileNote = '';
   if (book.fileHandle){
     try{
       let perm = 'denied';
@@ -1070,33 +959,16 @@ async function deleteBookEverywhere(book, rec){
         }
       }
       if (perm === 'granted' && typeof book.fileHandle.remove === 'function'){
-        await book.fileHandle.remove();
-        fileDeleted = true;
-      } else {
-        fileNote = 'Браузер не дал разрешение на удаление файла с устройства.';
-      }
-    }catch(e){
-      console.warn('Cannot delete physical file:', e);
-      fileNote = 'Не удалось удалить файл с устройства.';
-    }
-  } else {
-    fileNote = 'Файл был добавлен без привязки к устройству — он остался в папке Загрузки.';
-  }
-
-  // Удаляем закладки к этой книге
+        await book.fileHandle.remove();fileDeleted = true;
+      } else {fileNote = 'Браузер не дал разрешение на удаление файла с устройства.'}
+    }catch(e){console.warn(e);fileNote = 'Не удалось удалить файл с устройства.'}
+  } else {fileNote = 'Файл был добавлен без привязки к устройству — он остался в папке Загрузки.'}
   const bms = getBookmarks();
   if (bms[book.id]){ delete bms[book.id]; saveBookmarks(bms); }
-
-  // Удаляем из IndexedDB
   await dbDelete(book.id);
-
   renderAll();
-
-  if (fileDeleted){
-    toast('Книга удалена из приложения и с устройства ✅', 3000);
-  } else {
-    toast('Удалено из приложения. '+fileNote, 4200);
-  }
+  if (fileDeleted) toast('Книга удалена из приложения и с устройства ✅', 3000);
+  else toast('Удалено из приложения. '+fileNote, 4200);
 }
 
 /* ===== PICK FILE FOR PRESET ===== */
@@ -1104,37 +976,29 @@ let pendingPresetForPick = null;
 
 async function pickFileForPreset(rec){
   pendingPresetForPick = rec;
-  // Пробуем File System Access API (Chrome/Edge) — тогда сможем удалять файл с диска
   if ('showOpenFilePicker' in window){
     try{
       const [handle] = await window.showOpenFilePicker({
-        types: [{description:'PDF-файл', accept:{'application/pdf':['.pdf']}}],
-        multiple: false
+        types: [{description:'PDF-файл', accept:{'application/pdf':['.pdf']}}], multiple: false
       });
       const file = await handle.getFile();
-      if (file){
-        await addFileWithHandle(file, handle, rec);
-      }
-      pendingPresetForPick = null;
-      return;
+      if (file) await addFile(file, rec, handle);
+      pendingPresetForPick = null;return;
     }catch(e){
       if (e.name === 'AbortError'){ pendingPresetForPick = null; return; }
-      console.warn('showOpenFilePicker failed, fallback to input:', e);
+      console.warn('showOpenFilePicker failed, fallback:', e);
     }
   }
-  // Fallback — обычный input
   fileInput.click();
 }
 
 fileInput.onchange = async (e)=>{
-  const files=[...e.target.files];
-  fileInput.value='';
-  const rec = pendingPresetForPick;
-  pendingPresetForPick = null;
+  const files=[...e.target.files];fileInput.value='';
+  const rec = pendingPresetForPick;pendingPresetForPick = null;
   for (const f of files) await addFile(f, rec);
 };
 
-/* ===== DOWNLOAD REC (автоматическая попытка) ===== */
+/* ===== DOWNLOAD REC ===== */
 async function downloadRec(rec){
   toast('Пытаюсь скачать автоматически…',4000);
   try{
@@ -1146,9 +1010,7 @@ async function downloadRec(rec){
     const head=new Uint8Array(ab.slice(0,5));
     if(!(head[0]===0x25&&head[1]===0x50&&head[2]===0x44&&head[3]===0x46))throw new Error('не PDF');
     await saveAbAsBook(ab, rec.name, null);
-    sndAdd();
-    toast('Скачано и добавлено в «Мои книги» ✅',3000);
-    renderAll();
+    sndAdd();toast('Скачано и добавлено в «Мои книги» ✅',3000);renderAll();
   }catch(err){
     console.warn(err);
     const open=confirm('Автоматически скачать не удалось.\n\nОткрыть ссылку в браузере, чтобы скачать вручную?\n\nПотом нажмите «📁 Найти в файлах» на этой карточке.');
@@ -1166,64 +1028,35 @@ async function saveAbAsBook(ab, name, fileHandle){
   const ctx=c.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,c.width,c.height);
   await page.render({canvasContext:ctx,viewport:vp}).promise;
   const thumb=c.toDataURL('image/jpeg',0.78);
-
   let author='';
   try{
-    const meta=await pdf.getMetadata();
-    author=(meta?.info?.Author||'').trim();
+    const meta=await pdf.getMetadata();author=(meta?.info?.Author||'').trim();
     if(author.length>200)author='';
   }catch(e){}
-
   const book={
     id:'b_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-    name, author,
-    size:ab.byteLength,
-    pages:pdf.numPages,
-    thumb, data:ab,
-    fileHandle: fileHandle || null,
-    addedAt: Date.now(),
-    lastPage: 1
+    name, author, size:ab.byteLength, pages:pdf.numPages,
+    thumb, data:ab, fileHandle: fileHandle || null,
+    addedAt: Date.now(), lastPage: 1
   };
-  await dbPut(book);
-  return book;
+  await dbPut(book);return book;
 }
 
-async function addFileWithHandle(file, handle, rec){
-  toast('Обрабатываю: '+file.name,3000);
-  try{
-    const data = await file.arrayBuffer();
-    const cleanName = rec ? rec.name : file.name.replace(/\.pdf$/i,'');
-    await saveAbAsBook(data, cleanName, handle);
-    sndAdd();
-    if (rec) toast('«'+rec.name+'» добавлена в «Мои книги» ✅',3200);
-    else toast('Книга добавлена: '+cleanName);
-    renderAll();
-    showScreen('mine');
-  }catch(err){
-    console.error(err);
-    toast('Ошибка: '+(err.message||err));
-  }
-}
-
-async function addFile(file, recContext = null){
+async function addFile(file, recContext = null, fileHandle = null){
   if(!/\.pdf$/i.test(file.name)&&file.type!=='application/pdf'){toast('Не PDF: '+file.name);return}
   toast('Обрабатываю: '+file.name,3000);
   try{
     const data = await file.arrayBuffer();
     const cleanName = file.name.replace(/\.pdf$/i,'');
-    // Ищем соответствие рекомендации
     const matchedRec = recContext || REC_BOOKS.find(r=>{
-      const t=(r.matchAny||[]).map(normMatch);
-      const n=normMatch(cleanName);
+      const t=(r.matchAny||[]).map(normMatch);const n=normMatch(cleanName);
       return t.some(x=>n.includes(x));
     });
     const nameToSave = matchedRec ? matchedRec.name : cleanName;
-    await saveAbAsBook(data, nameToSave, null);
+    await saveAbAsBook(data, nameToSave, fileHandle);
     sndAdd();
-    if (matchedRec) toast('«'+matchedRec.name+'» добавлена в «Мои книги» ✅',3200);
-    else toast('Книга добавлена: '+cleanName);
-    renderAll();
-    showScreen('mine');
+    toast(matchedRec ? '«'+matchedRec.name+'» добавлена в «Мои книги» ✅' : 'Книга добавлена: '+cleanName, 3200);
+    renderAll();showScreen('mine');
   }catch(err){console.error(err);toast('Ошибка: '+(err.message||err))}
 }
 
@@ -1241,27 +1074,15 @@ searchScreen.innerHTML=`
   <div class="grid-toolbar"><input class="search-input" id="searchInput" placeholder="Начните печатать…"></div>
   <div class="grid" id="gridSearch"></div>`;
 document.body.appendChild(searchScreen);
-document.getElementById('btnSearch').addEventListener('click',()=>{
-  showScreen('search');
-  setTimeout(()=>document.getElementById('searchInput').focus(),120);
-});
+document.getElementById('btnSearch').addEventListener('click',()=>{showScreen('search');setTimeout(()=>document.getElementById('searchInput').focus(),120)});
 document.getElementById('searchInput').addEventListener('input',async e=>{
   const q=e.target.value.trim().toLowerCase();
-  const grid=document.getElementById('gridSearch');
-  if(!q){grid.innerHTML='';return}
-  const books=await dbGetAll();
-  const items=[];
-  for(const b of books){
-    const hay=((b.name||'')+' '+(b.author||'')).toLowerCase();
-    if(hay.includes(q))items.push({kind:'book',b});
-  }
+  const grid=document.getElementById('gridSearch');if(!q){grid.innerHTML='';return}
+  const books=await dbGetAll();const items=[];
+  for(const b of books){const hay=((b.name||'')+' '+(b.author||'')).toLowerCase();if(hay.includes(q))items.push({kind:'book',b})}
   for(const r of REC_BOOKS){
     const hay=[r.name,r.author,r.className].filter(Boolean).join(' ').toLowerCase();
-    if(hay.includes(q)){
-      const matched=findMatchingSaved(books,r);
-      if(!items.some(it=>it.kind==='rec'&&it.r.id===r.id))
-        items.push({kind:'rec',r,matched});
-    }
+    if(hay.includes(q)){const matched=findMatchingSaved(books,r);if(!items.some(it=>it.kind==='rec'&&it.r.id===r.id))items.push({kind:'rec',r,matched})}
   }
   grid.innerHTML='';
   if(!items.length){grid.innerHTML=`<div class="section-empty">Ничего не найдено.</div>`;return}
@@ -1281,9 +1102,7 @@ document.getElementById('searchInput').addEventListener('input',async e=>{
       const r=it.r;const m=it.matched;const card=document.createElement('div');
       card.className='card rec'+(m?' matched':'');
       const coverInner = m&&m.thumb?`<img src="${m.thumb}" alt="">`:`<div class="placeholder-cover ${phClass(r)}">${PRESET_SVG}</div>`;
-      const actions = m
-        ?`<button class="btn ok" data-act="open">Читать</button>`
-        :`<button class="btn" data-act="pick">📁 Найти</button>`;
+      const actions = m?`<button class="btn ok" data-act="open">Читать</button>`:`<button class="btn" data-act="pick">📁 Найти</button>`;
       card.innerHTML=`
         <div class="cover"><div class="spine ${m?'ok':'rec'}"></div>${coverInner}
           <div class="badge rec">РЕКОМЕНДУЕМ</div>
@@ -1291,73 +1110,15 @@ document.getElementById('searchInput').addEventListener('input',async e=>{
         <div class="card-body"><h3>${esc(r.name)}</h3>
           <div class="meta">${esc([(m&&m.author)||r.author||'',r.className].filter(Boolean).join(' · '))}</div>
           <div class="card-actions">${actions}</div></div>`;
-      if(m){
-        card.querySelector('[data-act="open"]').onclick=()=>openBook(m.id);
-        card.querySelector('.cover').onclick=()=>openBook(m.id);
-      } else {
-        card.querySelector('[data-act="pick"]').onclick=()=>pickFileForPreset(r);
-        card.querySelector('.cover').onclick=()=>pickFileForPreset(r);
-      }
+      if(m){card.querySelector('[data-act="open"]').onclick=()=>openBook(m.id);card.querySelector('.cover').onclick=()=>openBook(m.id)}
+      else{card.querySelector('[data-act="pick"]').onclick=()=>pickFileForPreset(r);card.querySelector('.cover').onclick=()=>pickFileForPreset(r)}
       grid.appendChild(card);
     }
   }
 });
 
-/* ===== FX: FIREWORKS ===== */
-const fxCanvas=document.getElementById('fxCanvas');const fxCtx=fxCanvas.getContext('2d');
-let fxParticles=[],fxRunning=false;
-function fxResize(){fxCanvas.width=window.innerWidth;fxCanvas.height=window.innerHeight}
-window.addEventListener('resize',fxResize);fxResize();
-function fxLaunch(x,y,hue){
-  const colors=hue!=null?[`hsl(${hue},100%,65%)`,`hsl(${(hue+30)%360},100%,70%)`,`hsl(${(hue-30+360)%360},100%,70%)`,'#fff']
-    :['#ff3366','#ff9933','#ffdd33','#33dd66','#33ccff','#9966ff','#ff33cc','#fff'];
-  const N=55+Math.floor(Math.random()*25);
-  for(let i=0;i<N;i++){
-    const ang=(Math.PI*2*i)/N+(Math.random()-.5)*.3;
-    const sp=2.5+Math.random()*5.5;
-    fxParticles.push({x,y,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,life:1,decay:.012+Math.random()*.012,color:colors[Math.floor(Math.random()*colors.length)],size:1.5+Math.random()*2.6});
-  }
-  if(!fxRunning){fxRunning=true;fxCanvas.style.display='block';requestAnimationFrame(fxLoop)}
-}
-function fxLoop(){
-  fxCtx.globalCompositeOperation='source-over';fxCtx.fillStyle='rgba(0,0,0,.12)';fxCtx.fillRect(0,0,fxCanvas.width,fxCanvas.height);
-  fxCtx.globalCompositeOperation='lighter';let alive=false;
-  for(let i=fxParticles.length-1;i>=0;i--){
-    const p=fxParticles[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.07;p.vx*=.985;p.vy*=.985;p.life-=p.decay;
-    if(p.life<=0){fxParticles.splice(i,1);continue}
-    alive=true;fxCtx.globalAlpha=Math.max(0,p.life);fxCtx.fillStyle=p.color;
-    fxCtx.beginPath();fxCtx.arc(p.x,p.y,p.size*(.4+p.life*.8),0,Math.PI*2);fxCtx.fill();
-  }
-  fxCtx.globalAlpha=1;
-  if(alive||fxParticles.length>0)requestAnimationFrame(fxLoop);
-  else{fxRunning=false;fxCtx.clearRect(0,0,fxCanvas.width,fxCanvas.height);fxCanvas.style.display='none'}
-}
-function fxShow(){
-  if(!settings.fun)return;
-  const N=5+Math.floor(Math.random()*3);const baseHue=Math.random()*360;
-  for(let i=0;i<N;i++)setTimeout(()=>{fxLaunch(window.innerWidth*(.12+Math.random()*.76),window.innerHeight*(.15+Math.random()*.5),(baseHue+i*40)%360)},i*160);
-}
-document.getElementById('logo').addEventListener('click',()=>{fxShow();if(settings.fun)toast('🎆 Салют!',1200)});
-
-/* ===== FX: OVERLAY ===== */
-const fxOverlay=document.getElementById('fxOverlay');
-let fxTimer=null;
-function fxShowText(line1,line2){
-  if(!settings.fun)return;
-  document.getElementById('fxLine1').textContent=line1;
-  document.getElementById('fxLine2').textContent=line2;
-  fxOverlay.classList.remove('show');
-  void fxOverlay.offsetWidth;
-  fxOverlay.classList.add('show');
-  clearTimeout(fxTimer);fxTimer=setTimeout(()=>fxOverlay.classList.remove('show'),2700);
-}
-function catRun(){
-  const c=document.createElement('div');c.className='cat-run';c.textContent='🐈‍⬛';
-  document.body.appendChild(c);setTimeout(()=>c.remove(),3100);
-}
-
 /* ===== READER ===== */
-const state={book:null,pdf:null,page:1,fit:'page',manualScale:null,lastScale:1,renderToken:0,thumbCache:{},shown:{}};
+const state={book:null,pdf:null,page:1,renderToken:0,thumbCache:{},zoom:1,panX:0,panY:0};
 const els={
   canvas:document.getElementById('pageCanvas'),
   canvas2:document.getElementById('pageCanvas2'),
@@ -1373,12 +1134,42 @@ const els={
   zonePrev:document.getElementById('zonePrev'),
   zoneNext:document.getElementById('zoneNext')
 };
+
 function isSkip(){return settings.skipFirst}
 function realToVirtual(rp){return isSkip()?Math.max(1,rp-1):rp}
 function virtualToReal(vp){return isSkip()?vp+1:vp}
 function virtualTotal(){if(!state.pdf)return 1;return isSkip()?Math.max(1,state.pdf.numPages-1):state.pdf.numPages}
 function realMin(){return isSkip()?2:1}
 function effectiveStep(){return settings.twoPage&&window.innerWidth>820?2:1}
+
+/* --- Зум --- */
+function applyTransform(){
+  if(state.zoom===1&&state.panX===0&&state.panY===0){
+    els.wrap.style.transform='';
+  }else{
+    els.wrap.style.transform=`translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+  }
+}
+function resetZoom(){
+  state.zoom=1;state.panX=0;state.panY=0;
+  applyTransform();
+}
+function zoomAt(ax,ay,factor){
+  const rect=els.wrap.getBoundingClientRect();
+  const lx=(ax-rect.left)/state.zoom;
+  const ly=(ay-rect.top)/state.zoom;
+  const nz=Math.max(0.5,Math.min(8,state.zoom*factor));
+  if(nz===state.zoom)return;
+  state.panX=ax-rect.left+state.panX-lx*nz;
+  state.panY=ay-rect.top +state.panY-ly*nz;
+  state.zoom=nz;
+  applyTransform();
+}
+function zoomCenter(factor){
+  const r=els.stage.getBoundingClientRect();
+  zoomAt(r.left+r.width/2,r.top+r.height/2,factor);
+}
+
 function updatePageUI(){
   if(!state.pdf)return;
   const vt=virtualTotal();const vp=realToVirtual(state.page);
@@ -1394,14 +1185,14 @@ function updatePageUI(){
 }
 async function openBook(id){
   const b=await dbGet(id);if(!b){toast('Не найдена');return}
-  state.book=b;state.thumbCache={};state.shown={};
+  state.book=b;state.thumbCache={};
   lastScreenBeforeReader=currentScreen==='reader'?lastScreenBeforeReader:currentScreen;
-  els.loading.style.display='grid';
-  els.loading.firstElementChild.innerHTML='<div class="spinner"></div><div>Открываю…</div>';
-  try{state.pdf=await pdfjsLib.getDocument({data:b.data.slice(0)}).promise}catch(e){console.error(e);toast('Ошибка');els.loading.style.display='none';return}
+  showLoading();
+  try{state.pdf=await pdfjsLib.getDocument({data:b.data.slice(0)}).promise}
+  catch(e){console.error(e);toast('Ошибка');hideLoading();return}
   state.page=Math.min(Math.max(1,b.lastPage||1),state.pdf.numPages);
   if(isSkip()&&state.page===1&&state.pdf.numPages>1)state.page=2;
-  state.manualScale=null;state.lastScale=1;state.fit='page';
+  resetZoom();
   document.getElementById('rTitle').textContent=b.name;
   document.querySelector('header').style.display='none';
   showScreen('reader');
@@ -1412,46 +1203,47 @@ async function openBookAt(id,page){
   if(state.pdf){state.page=Math.min(Math.max(page,realMin()),state.pdf.numPages);await renderPage()}
 }
 function closeReader(){
-  if(state.book&&state.page){
-    dbGet(state.book.id).then(b=>{if(b){b.lastPage=state.page;dbPut(b)}});
-  }
-  closeThumbs();sndClose();
-  state.pdf=null;state.book=null;state.thumbCache={};state.shown={};
+  if(state.book&&state.page){dbGet(state.book.id).then(b=>{if(b){b.lastPage=state.page;dbPut(b)}})}
+  resetZoom();closeThumbs();sndClose();
+  state.pdf=null;state.book=null;state.thumbCache={};
   document.querySelector('header').style.display='flex';
   showScreen(lastScreenBeforeReader||'mine');
   renderAll();
 }
 document.getElementById('btnBackReader').onclick=closeReader;
 
-async function renderPage(){
+function showLoading(){els.loading.classList.add('show')}
+function hideLoading(){els.loading.classList.remove('show')}
+
+async function renderPage(opts={}){
+  const silent=!!opts.silent;
   if(!state.pdf)return;
   const token=++state.renderToken;
-  els.loading.style.display='grid';
+  let loadTimer=null;
+  if(!silent)loadTimer=setTimeout(showLoading,200);
   try{
     const page=await state.pdf.getPage(state.page);
-    if(token!==state.renderToken)return;
+    if(token!==state.renderToken){if(loadTimer)clearTimeout(loadTimer);return}
     const stageRect=els.stage.getBoundingClientRect();
-    const padX=48,padY=48;
+    const pad=48;
     const twoPage=settings.twoPage&&window.innerWidth>820&&state.pdf.numPages>1&&state.page<state.pdf.numPages;
-    const availW=Math.max(100,stageRect.width-padX);
-    const availH=Math.max(100,stageRect.height-padY);
+    const availW=Math.max(100,stageRect.width-pad);
+    const availH=Math.max(100,stageRect.height-pad);
     const base=page.getViewport({scale:1});
-    let scale;
-    if(state.manualScale!=null)scale=state.manualScale;
-    else if(state.fit==='width')scale=(twoPage?availW/2:availW)/base.width;
-    else scale=Math.min((twoPage?availW/2:availW)/base.width,availH/base.height);
+    const scaleW=(twoPage?availW/2:availW)/base.width;
+    const scale=Math.min(scaleW,availH/base.height);
     const vp=page.getViewport({scale});
     const dpr=Math.min(window.devicePixelRatio||1,2);
     els.canvas.width=Math.floor(vp.width*dpr);els.canvas.height=Math.floor(vp.height*dpr);
     els.canvas.style.width=Math.floor(vp.width)+'px';els.canvas.style.height=Math.floor(vp.height)+'px';
-    let ctx=els.canvas.getContext('2d');
+    const ctx=els.canvas.getContext('2d');
     ctx.fillStyle='#fff';ctx.fillRect(0,0,els.canvas.width,els.canvas.height);
     ctx.setTransform(dpr,0,0,dpr,0,0);
     await page.render({canvasContext:ctx,viewport:vp}).promise;
-    if(token!==state.renderToken)return;
+    if(token!==state.renderToken){if(loadTimer)clearTimeout(loadTimer);return}
     if(twoPage){
       const page2=await state.pdf.getPage(state.page+1);
-      if(token!==state.renderToken)return;
+      if(token!==state.renderToken){if(loadTimer)clearTimeout(loadTimer);return}
       els.canvas2.style.display='block';
       els.canvas2.width=Math.floor(vp.width*dpr);els.canvas2.height=Math.floor(vp.height*dpr);
       els.canvas2.style.width=Math.floor(vp.width)+'px';els.canvas2.style.height=Math.floor(vp.height)+'px';
@@ -1464,44 +1256,33 @@ async function renderPage(){
     }else{
       els.canvas2.style.display='none';els.wrap.classList.remove('two-page');
     }
-    state.lastScale=vp.width/base.width;
     updatePageUI();
-    els.loading.style.display='none';
-    const vp67=realToVirtual(state.page);
-    const pairs={67:['СИКСЕВЕН','67'],42:['ОТВЕТ НА ГЛАВНЫЙ ВОПРОС','42'],100:['СОТОЧКА!','100'],365:['ГОДОВОЙ ЗАПАС','365']};
-    if(settings.fun&&!state.shown['p'+vp67]&&pairs[vp67]){
-      state.shown['p'+vp67]=true;
-      fxShowText(pairs[vp67][0],pairs[vp67][1]);
-      if(vp67===42)fxShow();
-    }
-    if(settings.fun&&vp67===13&&!state.shown['cat13']){state.shown['cat13']=true;catRun()}
-  }catch(err){if(token!==state.renderToken)return;console.error(err);els.loading.style.display='none'}
+    if(loadTimer)clearTimeout(loadTimer);
+    hideLoading();
+  }catch(err){
+    if(token!==state.renderToken){if(loadTimer)clearTimeout(loadTimer);return}
+    console.error(err);if(loadTimer)clearTimeout(loadTimer);hideLoading();
+  }
 }
 function updateSliderFill(){
   const min=+els.slider.min,max=+els.slider.max,val=+els.slider.value;
   els.slider.style.backgroundSize=(max>min?((val-min)/(max-min))*100:0)+'% 100%';
 }
-async function goToPage(realN,direction){
+async function goToPage(realN){
   if(!state.pdf)return;
   realN=Math.round(realN);if(isNaN(realN))return;
   const rmin=realMin();
   realN=Math.max(rmin,Math.min(state.pdf.numPages,realN));
   if(realN===state.page)return;
-  const dir=direction??(realN>state.page?1:-1);
-  const wrap=els.wrap;
-  wrap.classList.add('animating');
-  wrap.style.transform=`translateX(${-dir*40}px)`;wrap.style.opacity='0';
-  await new Promise(r=>setTimeout(r,160));
-  state.page=realN;sndPage();
+  state.page=realN;
+  resetZoom();
+  sndPage();
   await renderPage();
-  wrap.classList.remove('animating');
-  wrap.style.transform=`translateX(${dir*40}px)`;wrap.style.opacity='0';
-  requestAnimationFrame(()=>{wrap.classList.add('animating');wrap.style.transform='translateX(0)';wrap.style.opacity='1'});
   if(state.book){const b=state.book;b.lastPage=state.page;dbPut(b).catch(()=>{})}
 }
 const step=()=>effectiveStep();
-const nextPage=()=>goToPage(state.page+step(),1);
-const prevPage=()=>{if(state.page<=realMin())return;goToPage(state.page-step(),-1)};
+const nextPage=()=>goToPage(state.page+step());
+const prevPage=()=>{if(state.page<=realMin())return;goToPage(state.page-step())};
 els.next.onclick=nextPage;els.prev.onclick=prevPage;els.zoneNext.onclick=nextPage;els.zonePrev.onclick=prevPage;
 function showBubble(){const min=+els.slider.min,max=+els.slider.max,val=+els.slider.value;
   const pct=max>min?((val-min)/(max-min))*100:0;
@@ -1519,51 +1300,118 @@ els.pageInput.onchange=e=>{let v=+e.target.value.replace(/\D/g,'');if(!v){e.targ
 els.pageInput.onkeydown=e=>{if(e.key==='Enter')e.target.blur()};
 
 document.addEventListener('keydown',e=>{
-  if(bookmarkModal.classList.contains('open')){
-    if(e.key==='Escape')bookmarkModal.classList.remove('open');
-    return;
-  }
+  if(bookmarkModal.classList.contains('open')){if(e.key==='Escape')bookmarkModal.classList.remove('open');return}
   if(settingsPop.classList.contains('open')){if(e.key==='Escape')closeSettings();return}
   if(thumbsModal.classList.contains('open')){if(e.key==='Escape')closeThumbs();return}
   if(currentScreen!=='reader')return;
   if(document.activeElement===els.pageInput)return;
   if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();nextPage()}
   else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prevPage()}
-  else if(e.key==='Home'){e.preventDefault();goToPage(realMin(),-1)}
-  else if(e.key==='End'){e.preventDefault();goToPage(state.pdf.numPages,1)}
+  else if(e.key==='Home'){e.preventDefault();goToPage(realMin())}
+  else if(e.key==='End'){e.preventDefault();goToPage(state.pdf.numPages)}
   else if(e.key==='Escape'){closeReader()}
-  else if(e.key==='+'||e.key==='='){zoom(1.2)}
-  else if(e.key==='-'){zoom(1/1.2)}
-  else if(e.key==='0'){zoomReset()}
+  else if(e.key==='+'||e.key==='='){zoomCenter(1.25)}
+  else if(e.key==='-'){zoomCenter(1/1.25)}
+  else if(e.key==='0'){resetZoom()}
 });
 
-let touchX=null,touchY=null;
-els.stage.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;touchX=e.touches[0].clientX;touchY=e.touches[0].clientY},{passive:true});
+/* ===== ЖЕСТЫ ===== */
+const touchState={
+  mode:null,
+  startX:0,startY:0,
+  pinchStartDist:0,
+  pinchStartZoom:1,pinchStartPanX:0,pinchStartPanY:0,
+  pinchStartMidX:0,pinchStartMidY:0,
+  localX:0,localY:0
+};
+function touchDist(a,b){return Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)}
+
+els.stage.addEventListener('touchstart',e=>{
+  if(e.touches.length===2&&settings.pinchZoom){
+    const t1=e.touches[0],t2=e.touches[1];
+    const rect=els.wrap.getBoundingClientRect();
+    const midX=(t1.clientX+t2.clientX)/2;
+    const midY=(t1.clientY+t2.clientY)/2;
+    touchState.mode='pinch';
+    touchState.pinchStartDist=touchDist(t1,t2);
+    touchState.pinchStartZoom=state.zoom;
+    touchState.pinchStartPanX=state.panX;
+    touchState.pinchStartPanY=state.panY;
+    touchState.pinchStartMidX=midX;
+    touchState.pinchStartMidY=midY;
+    touchState.localX=(midX-rect.left)/state.zoom;
+    touchState.localY=(midY-rect.top)/state.zoom;
+    e.preventDefault();return;
+  }
+  if(e.touches.length===1){
+    touchState.mode=state.zoom>1.05?'pan':'swipe';
+    touchState.startX=e.touches[0].clientX;
+    touchState.startY=e.touches[0].clientY;
+    touchState.pinchStartPanX=state.panX;
+    touchState.pinchStartPanY=state.panY;
+  }
+},{passive:false});
+
+els.stage.addEventListener('touchmove',e=>{
+  if(touchState.mode==='pinch'&&e.touches.length===2&&settings.pinchZoom){
+    const t1=e.touches[0],t2=e.touches[1];
+    const curDist=touchDist(t1,t2);
+    const curMidX=(t1.clientX+t2.clientX)/2;
+    const curMidY=(t1.clientY+t2.clientY)/2;
+    const newZoom=Math.max(0.5,Math.min(8,
+      touchState.pinchStartZoom*(curDist/touchState.pinchStartDist)));
+    const dMidX=curMidX-touchState.pinchStartMidX;
+    const dMidY=curMidY-touchState.pinchStartMidY;
+    state.zoom=newZoom;
+    state.panX=touchState.pinchStartPanX+dMidX+touchState.localX*(touchState.pinchStartZoom-newZoom);
+    state.panY=touchState.pinchStartPanY+dMidY+touchState.localY*(touchState.pinchStartZoom-newZoom);
+    applyTransform();
+    e.preventDefault();return;
+  }
+  if(touchState.mode==='pan'&&e.touches.length===1){
+    const t=e.touches[0];
+    state.panX=touchState.pinchStartPanX+(t.clientX-touchState.startX);
+    state.panY=touchState.pinchStartPanY+(t.clientY-touchState.startY);
+    applyTransform();
+    e.preventDefault();return;
+  }
+},{passive:false});
+
 els.stage.addEventListener('touchend',e=>{
-  if(touchX==null)return;const t=e.changedTouches[0];const dx=t.clientX-touchX,dy=t.clientY-touchY;
-  touchX=touchY=null;
-  if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){if(dx<0)nextPage();else prevPage()}
+  if(touchState.mode==='pinch'&&e.touches.length<2){
+    touchState.mode=null;return;
+  }
+  if(touchState.mode==='pan'&&e.touches.length===0){
+    touchState.mode=null;return;
+  }
+  if(touchState.mode==='swipe'&&e.touches.length===0){
+    const t=e.changedTouches[0];
+    const dx=t.clientX-touchState.startX;
+    const dy=t.clientY-touchState.startY;
+    touchState.mode=null;
+    if(settings.swipeNav&&Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){
+      if(dx<0)nextPage();else prevPage();
+    }
+  }
 },{passive:true});
 
-function zoom(f){state.lastScale=(state.lastScale||1)*f;state.manualScale=state.lastScale;renderPage()}
-function zoomReset(){state.manualScale=null;state.lastScale=1;state.fit='page';renderPage()}
-document.getElementById('zoomIn').onclick=()=>zoom(1.2);
-document.getElementById('zoomOut').onclick=()=>zoom(1/1.2);
-document.getElementById('zoomFit').onclick=zoomReset;
+els.stage.addEventListener('touchcancel',()=>{touchState.mode=null});
 
-let resizeT;window.addEventListener('resize',()=>{if(currentScreen!=='reader')return;clearTimeout(resizeT);resizeT=setTimeout(()=>{state.manualScale=null;state.lastScale=1;renderPage()},140)});
+document.getElementById('zoomIn').onclick=()=>zoomCenter(1.25);
+document.getElementById('zoomOut').onclick=()=>zoomCenter(1/1.25);
+document.getElementById('zoomFit').onclick=resetZoom;
+
+let resizeT;window.addEventListener('resize',()=>{if(currentScreen!=='reader')return;clearTimeout(resizeT);resizeT=setTimeout(()=>{resetZoom();renderPage()},140)});
 
 /* ===== BOOKMARK BUTTON ===== */
 const bookmarkModal=document.getElementById('bookmarkModal');
 document.getElementById('btnBookmark').addEventListener('click',()=>{
   if(!state.book)return;
-  const page=state.page;
-  const existing=isBookmarked(state.book.id,page);
+  const page=state.page;const existing=isBookmarked(state.book.id,page);
   document.getElementById('bmNote').value=existing?getBookmarkNote(state.book.id,page):'';
   document.getElementById('bmDelete').style.display=existing?'inline-flex':'none';
   document.getElementById('bmSave').textContent=existing?'Обновить':'Сохранить';
-  bookmarkModal.classList.add('open');
-  setTimeout(()=>document.getElementById('bmNote').focus(),100);
+  bookmarkModal.classList.add('open');setTimeout(()=>document.getElementById('bmNote').focus(),100);
 });
 document.getElementById('bmCancel').onclick=()=>bookmarkModal.classList.remove('open');
 bookmarkModal.addEventListener('click',e=>{if(e.target===bookmarkModal)bookmarkModal.classList.remove('open')});
@@ -1575,8 +1423,7 @@ document.getElementById('bmSave').onclick=()=>{
   const idx=all[state.book.id].findIndex(b=>b.page===state.page);
   if(idx>=0)all[state.book.id][idx].note=note;
   else all[state.book.id].push({page:state.page,note,date:Date.now()});
-  saveBookmarks(all);
-  bookmarkModal.classList.remove('open');
+  saveBookmarks(all);bookmarkModal.classList.remove('open');
   document.getElementById('btnBookmark').classList.add('on');
   toast('Закладка сохранена 🔖');
 };
@@ -1597,13 +1444,11 @@ function openThumbs(){
   if(!state.pdf)return;
   thumbsModal.classList.add('open');thumbsGrid.innerHTML='';
   thumbsCnt.textContent=`${realToVirtual(state.page)} / ${virtualTotal()}`;
-  const bms=getBookmarks()[state.book.id]||[];
-  const bmSet=new Set(bms.map(b=>b.page));
+  const bms=getBookmarks()[state.book.id]||[];const bmSet=new Set(bms.map(b=>b.page));
   for(let i=1;i<=state.pdf.numPages;i++){
     const isCover=(i===1&&isSkip());
     const card=document.createElement('button');
-    card.className='thumb'+(i===state.page?' current':'');
-    card.dataset.page=i;
+    card.className='thumb'+(i===state.page?' current':'');card.dataset.page=i;
     card.innerHTML=`
       <div class="thumb-canvas-wrap">
         ${isCover?'<div class="thumb-cover-tag">ОБЛОЖКА</div>':''}
@@ -1635,8 +1480,7 @@ async function renderThumb(card,pageNum){
       url=c.toDataURL('image/jpeg',0.72);state.thumbCache[pageNum]=url;
     }
     if(!card.isConnected)return;
-    const wrap=card.querySelector('.thumb-canvas-wrap');
-    if(!wrap)return;
+    const wrap=card.querySelector('.thumb-canvas-wrap');if(!wrap)return;
     const tags=[...wrap.querySelectorAll('.thumb-cover-tag,.thumb-bm-tag')];
     wrap.innerHTML='';tags.forEach(t=>wrap.appendChild(t));
     const img=new Image();img.src=url;img.style.maxWidth='100%';img.style.maxHeight='100%';
@@ -1648,8 +1492,8 @@ document.getElementById('btnGrid').onclick=openThumbs;
 document.getElementById('thumbsClose').onclick=closeThumbs;
 thumbsModal.addEventListener('click',e=>{if(e.target===thumbsModal)closeThumbs()});
 const origGoToPage=goToPage;
-goToPage=async function(realN,direction){
-  await origGoToPage(realN,direction);
+goToPage=async function(realN){
+  await origGoToPage(realN);
   if(thumbsModal.classList.contains('open')){
     thumbsCnt.textContent=`${realToVirtual(state.page)} / ${virtualTotal()}`;
     thumbsGrid.querySelectorAll('.thumb').forEach(el=>el.classList.toggle('current',+el.dataset.page===state.page));
@@ -1657,8 +1501,9 @@ goToPage=async function(realN,direction){
 };
 
 /* ===== BOOT ===== */
-applyTheme();applyAccent();renderAccentPalette();
-syncSortUI();syncSkipFirstUI();syncTwoPageUI();syncFunUI();syncSoundsUI();
+applyTheme();
+syncSortUI();syncSkipFirstUI();syncTwoPageUI();
+syncSwipeNavUI();syncPinchZoomUI();syncSoundsUI();
 renderAll();
 showScreen('home');
 
