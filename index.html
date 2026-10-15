@@ -15,6 +15,7 @@
 <meta name="apple-mobile-web-app-title" content="Книги">
 <meta name="description" content="Читайте школьные учебники постранично.">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js"></script>
 <style>
 :root{
   --bg:#eef1f6;--panel:#ffffff;--text:#1c2431;--muted:#6b7787;
@@ -122,7 +123,6 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
   box-shadow:0 12px 36px rgba(20,40,70,.18);min-height:120px}
 .tile:hover{transform:translateY(-3px);box-shadow:0 20px 50px rgba(20,40,70,.28)}
 .tile:active{transform:scale(.985)}
-.tile[data-target="rec"]{background:linear-gradient(135deg,#8b5cf6 0%,#6d28d9 100%)}
 .tile[data-target="mine"]{background:linear-gradient(135deg,#12b8a8 0%,#0b6e66 100%)}
 .tile[data-target="bookmarks"]{background:linear-gradient(135deg,#f59e0b 0%,#d97706 100%)}
 .tile::before{content:'';position:absolute;top:-50%;right:-20%;width:70%;height:150%;
@@ -150,7 +150,6 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
   transform-style:preserve-3d;perspective:800px}
 .card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(20,40,70,.18)}
 .card.matched{border-color:rgba(34,160,107,.5)}
-.card.rec{border-color:rgba(139,92,246,.25)}
 .card .cover{aspect-ratio:3/4;background:var(--bg);position:relative;overflow:hidden;
   cursor:pointer;display:grid;place-items:center;transform-origin:center;
   transition:transform .3s ease}
@@ -159,27 +158,14 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
 .spine{position:absolute;left:0;top:0;bottom:0;width:7px;
   background:linear-gradient(180deg,var(--accent),var(--accent-2));opacity:.85;z-index:2}
 .spine.ok{background:linear-gradient(180deg,#22a06b,#178a58)}
-.spine.rec{background:linear-gradient(180deg,var(--rec),var(--rec-2))}
 .overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.55));
   opacity:0;transition:opacity .2s;display:flex;align-items:flex-end;padding:14px;color:#fff;
   font-size:12.5px;font-weight:600;z-index:3}
 .cover:hover .overlay{opacity:1}
-.placeholder-cover{position:absolute;inset:0;background:linear-gradient(135deg,var(--accent),var(--accent-2));
-  display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.9)}
-.placeholder-cover svg{width:56%;height:56%;opacity:.9}
-.placeholder-cover.soc{background:linear-gradient(135deg,#14b8a6 0%,#0d9488 50%,#0f766e 100%)}
-.placeholder-cover.physics{background:linear-gradient(135deg,#3b4a63 0%,#2a3548 50%,#1e293b 100%)}
-.placeholder-cover.english{background:linear-gradient(135deg,#a855f7 0%,#7e22ce 50%,#581c87 100%)}
-.placeholder-cover.russian{background:linear-gradient(135deg,#3b82f6 0%,#1e40af 50%,#1e3a8a 100%)}
-.placeholder-cover.bio{background:linear-gradient(135deg,#c4b5fd 0%,#a78bfa 50%,#7c3aed 100%)}
-.placeholder-cover.bio-pro{background:linear-gradient(135deg,#a78bfa 0%,#7c3aed 50%,#4c1d95 100%)}
-.placeholder-cover.geo{background:linear-gradient(135deg,#fbbf24 0%,#f59e0b 45%,#ea580c 100%)}
-.placeholder-cover.rec{background:linear-gradient(135deg,var(--rec),var(--rec-2))}
 .badge{position:absolute;top:10px;right:10px;font-size:10.5px;font-weight:800;letter-spacing:.4px;
   padding:5px 9px;border-radius:7px;box-shadow:0 4px 12px rgba(0,0,0,.18);
   display:flex;align-items:center;gap:4px;z-index:4}
 .badge.ok{background:#22a06b;color:#fff}
-.badge.rec{background:linear-gradient(135deg,var(--rec),var(--rec-2));color:#fff}
 .badge.bookmark{background:#f59e0b;color:#fff}
 .card-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:4px;flex:1}
 .card-body h3{margin:0;font-size:15px;letter-spacing:-.2px;line-height:1.25;
@@ -188,7 +174,6 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
 .card-body .hint{font-size:11.5px;color:var(--warn);background:var(--warn-bg);
   padding:7px 9px;border-radius:7px;margin-top:6px;line-height:1.35}
 .card-body .hint.ok{color:var(--ok);background:var(--ok-bg)}
-.card-body .hint.rec{color:var(--rec);background:var(--rec-bg)}
 .card-actions{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
 .card-actions .btn{flex:1;justify-content:center;padding:9px 10px;font-size:12.5px;min-width:0}
 .card-actions .icon-btn{width:36px;height:36px;font-size:14px}
@@ -229,14 +214,98 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
 .field textarea:focus{border-color:var(--accent);background:var(--panel)}
 .modal-actions{display:flex;gap:8px;margin-top:18px}
 .modal-actions .btn{flex:1;justify-content:center}
+
+/* ===== READER ===== */
 #screenReader{position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;padding-bottom:0 !important;padding-top:0}
 #screenReader.active{display:flex;flex-direction:column;overflow:hidden}
-.rbar{display:flex;align-items:center;gap:9px;padding:9px 14px;flex:0 0 auto;
-  padding-top:calc(9px + env(safe-area-inset-top));
-  background:var(--panel);border-bottom:1px solid var(--line);z-index:10}
-.rbar .rtitle{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;
-  text-overflow:ellipsis;max-width:340px}
-.rbar .rsub{font-size:11.5px;color:var(--muted);white-space:nowrap}
+
+.reader-back{
+  position:fixed;
+  top:calc(10px + env(safe-area-inset-top));
+  left:12px;
+  width:44px;height:44px;
+  border:none;border-radius:13px;
+  background:rgba(0,0,0,.5);
+  color:#fff;font-size:20px;
+  display:grid;place-items:center;
+  cursor:pointer;font-family:inherit;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  z-index:61;transition:.15s;
+  box-shadow:0 4px 14px rgba(0,0,0,.25)
+}
+.reader-back:hover{background:rgba(0,0,0,.7)}
+.reader-back:active{transform:scale(.92)}
+
+.reader-menu-btn{
+  position:fixed;
+  top:50%;right:0;
+  transform:translateY(-50%);
+  width:26px;height:68px;
+  border:none;border-radius:14px 0 0 14px;
+  background:rgba(0,0,0,.5);
+  color:#fff;font-size:22px;line-height:1;
+  display:grid;place-items:center;
+  cursor:pointer;font-family:inherit;
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  z-index:61;transition:.18s;
+  padding:0;
+  box-shadow:-4px 0 14px rgba(0,0,0,.2)
+}
+.reader-menu-btn:hover{background:rgba(0,0,0,.7);width:32px}
+.reader-menu-btn:active{transform:translateY(-50%) scale(.94)}
+
+.reader-menu{
+  position:fixed;
+  top:50%;right:0;
+  width:min(260px,76vw);
+  max-height:78vh;
+  transform:translate(100%,-50%);
+  background:var(--panel);
+  border-radius:18px 0 0 18px;
+  box-shadow:-16px 0 50px rgba(0,0,0,.45);
+  z-index:60;
+  padding:16px 12px 16px 14px;
+  display:flex;flex-direction:column;gap:4px;
+  transition:transform .26s cubic-bezier(.2,.9,.3,1);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch
+}
+.reader-menu.open{transform:translate(0,-50%)}
+
+.rm-title{
+  padding:2px 8px 4px;
+  font-size:14.5px;font-weight:800;
+  color:var(--text);line-height:1.3;
+  word-break:break-word
+}
+.rm-sub{
+  padding:0 8px 10px;
+  font-size:11.5px;color:var(--muted);
+  line-height:1.35
+}
+.rm-sep{height:1px;background:var(--line);margin:8px 6px}
+.rm-item{
+  display:flex;align-items:center;gap:12px;
+  width:100%;
+  padding:11px 12px;
+  border:none;border-radius:11px;
+  background:transparent;color:var(--text);
+  font-family:inherit;font-size:14px;font-weight:600;
+  cursor:pointer;text-align:left;
+  transition:.14s;
+  -webkit-tap-highlight-color:transparent
+}
+.rm-item:hover{background:var(--bg);color:var(--accent)}
+.rm-item:active{transform:scale(.98)}
+.rm-item.active{
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  color:#fff
+}
+.rm-ico{
+  font-size:18px;width:26px;text-align:center;flex:none;
+  display:inline-flex;align-items:center;justify-content:center
+}
+
 .stage{flex:1 1 auto;min-height:0;position:relative;overflow:hidden;background:var(--stage);
   display:grid;place-items:center;padding:24px;transition:background .25s;
   touch-action:none;user-select:none;-webkit-user-select:none}
@@ -289,6 +358,7 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
 .spinner{width:38px;height:38px;border:3px solid rgba(255,255,255,.25);
   border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
+
 .thumbs-modal{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.55);
   backdrop-filter:blur(4px);display:none;flex-direction:column;animation:fadeIn .18s ease}
 .thumbs-modal.open{display:flex}
@@ -322,6 +392,7 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
   font-weight:800;padding:3px 6px;border-radius:5px;letter-spacing:.4px;z-index:2}
 .thumb .thumb-cover-tag{left:6px;background:rgba(214,139,26,.92);color:#fff}
 .thumb .thumb-bm-tag{right:6px;background:#f59e0b;color:#fff}
+
 .toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;
   transform:translateX(-50%) translateY(90px);background:var(--text);color:var(--panel);
   padding:12px 20px;border-radius:11px;font-size:13.5px;font-weight:600;z-index:500;
@@ -338,9 +409,6 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
 @media (max-width:720px){
   .brand small{display:none}
   .brand .bt{max-width:130px}
-  .rbar .rtitle{max-width:130px}
-  .rbar{gap:6px;padding:8px 10px;padding-top:calc(8px + env(safe-area-inset-top))}
-  .rbar .icon-btn{width:34px;height:34px;font-size:14px}
   .navzone{display:none}
   .stage{padding:8px}
   .rfoot{gap:6px;padding:8px 10px}
@@ -360,6 +428,8 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
   .thumbs-head{padding:12px 14px}
   .modal-panel{padding:18px}
   .theme-options{grid-template-columns:repeat(2,1fr)}
+  .reader-menu{width:78vw;padding:14px 10px 14px 12px}
+  .rm-item{padding:10px;font-size:13.5px}
 }
 ::-webkit-scrollbar{width:10px;height:10px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -385,22 +455,14 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
 <section class="screen active" id="screenHome">
   <div class="hero">
     <h1>Книги</h1>
-    <p>Рекомендуемые учебники, ваша библиотека и закладки.</p>
+    <p>Ваша личная библиотека PDF и закладки.</p>
   </div>
   <div class="tiles">
-    <button class="tile" data-target="rec">
-      <div class="tile-icon">⭐</div>
-      <div class="tile-info">
-        <div class="tile-title">Рекомендуемые книги</div>
-        <div class="tile-desc">Подобраны для вас</div>
-      </div>
-      <div class="tile-count" id="tileRecCount">0</div>
-    </button>
     <button class="tile" data-target="mine">
       <div class="tile-icon">📚</div>
       <div class="tile-info">
         <div class="tile-title">Мои книги</div>
-        <div class="tile-desc">Ваши личные PDF-файлы</div>
+        <div class="tile-desc">PDF-файлы и ZIP-архивы с книгами</div>
       </div>
       <div class="tile-count" id="tileMineCount">0</div>
     </button>
@@ -415,25 +477,13 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
   </div>
 </section>
 
-<section class="screen" id="screenRec">
-  <div class="hero">
-    <h1>Рекомендуемые книги</h1>
-    <p>Нажмите «Найти в файлах», чтобы выбрать PDF на устройстве — приложение автоматически распознает учебник.</p>
-  </div>
-  <div class="grid-toolbar">
-    <div class="spacer"></div>
-    <span class="count-pill" id="recCount">0</span>
-  </div>
-  <div class="grid" id="gridRec"></div>
-</section>
-
 <section class="screen" id="screenMine">
   <div class="hero">
     <h1>Мои книги</h1>
-    <p>Ваши PDF-файлы. Добавьте файл или перетащите прямо в окно.</p>
+    <p>Добавьте PDF, ZIP-архив с книгами или перетащите файлы прямо в окно.</p>
   </div>
   <div class="grid-toolbar">
-    <button class="btn" id="btnAddMine">＋ Добавить PDF</button>
+    <button class="btn" id="btnAddMine">＋ Добавить</button>
     <div class="spacer"></div>
     <span class="count-pill" id="mineCount">0</span>
   </div>
@@ -453,18 +503,17 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
 </section>
 
 <section class="screen" id="screenReader">
-  <div class="rbar">
-    <button class="icon-btn" id="btnBackReader" title="Закрыть">←</button>
-    <div style="min-width:0">
-      <div class="rtitle" id="rTitle">—</div>
-      <div class="rsub" id="rSub">—</div>
-    </div>
-    <div class="spacer"></div>
-    <button class="icon-btn" id="btnBookmark" title="Закладка">🔖</button>
-    <button class="icon-btn" id="btnGrid" title="Сетка страниц">⊞</button>
-    <button class="icon-btn" id="zoomOut" title="Уменьшить">−</button>
-    <button class="icon-btn" id="zoomFit" title="По размеру">⛶</button>
-    <button class="icon-btn" id="zoomIn" title="Увеличить">＋</button>
+  <button class="reader-back" id="btnBackReader" title="Закрыть">←</button>
+  <button class="reader-menu-btn" id="btnReaderMenu" title="Меню">⋮</button>
+  <div class="reader-menu" id="readerMenu">
+    <div class="rm-title" id="rTitle">—</div>
+    <div class="rm-sub" id="rSub">—</div>
+    <button class="rm-item" id="rmBookmark"><span class="rm-ico">🔖</span><span>Закладка</span></button>
+    <button class="rm-item" id="rmGrid"><span class="rm-ico">⊞</span><span>Сетка страниц</span></button>
+    <div class="rm-sep"></div>
+    <button class="rm-item" id="rmZoomIn"><span class="rm-ico">＋</span><span>Приблизить</span></button>
+    <button class="rm-item" id="rmZoomOut"><span class="rm-ico">−</span><span>Отдалить</span></button>
+    <button class="rm-item" id="rmZoomFit"><span class="rm-ico">⛶</span><span>По размеру</span></button>
   </div>
   <div class="stage" id="stage">
     <div id="pageWrap">
@@ -587,9 +636,9 @@ header{height:var(--header-h);display:flex;align-items:center;gap:12px;padding:0
 </div>
 
 <div class="drop-overlay" id="dropOverlay">
-  <div class="box"><div class="ico">📚</div><div>Отпустите PDF, чтобы добавить в библиотеку</div></div>
+  <div class="box"><div class="ico">📚</div><div>Отпустите PDF или ZIP, чтобы добавить в библиотеку</div></div>
 </div>
-<input type="file" id="fileInput" accept="application/pdf,.pdf" multiple style="display:none">
+<input type="file" id="fileInput" accept="application/pdf,.pdf,application/zip,.zip,application/x-zip-compressed" multiple style="display:none">
 <input type="file" id="importInput" accept="application/json,.json" style="display:none">
 <div class="toast" id="toast"></div>
 
@@ -677,41 +726,6 @@ function removeBookmark(bookId,page){
 }
 function getBookmarkNote(bookId,page){const all=getBookmarks();const arr=all[bookId]||[];const f=arr.find(b=>b.page===page);return f?f.note:''}
 
-/* ===== RECOMMENDED ===== */
-const REC_BOOKS=[
-  {id:'rec_soc11',name:'Обществознание. 11 класс',className:'11 класс',author:'Л. Н. Боголюбов (ред.)',
-   url:'https://share.google/sOP0fqwrPDpHAj9sj',
-   matchAny:['obschestvoznanie','обществознание','bogolyubov','боголюбов'],theme:'soc'},
-  {id:'rec_phys11',name:'Физика. 11 класс',className:'11 класс',author:'Г. Я. Мякишев, Б. Б. Буховцев, В. М. Чаругин',
-   url:'https://share.google/P6ARVA8qyMjuyEXWX',
-   matchAny:['физика','мякишев','буховцев','чаругин','myakishev','physics'],theme:'phys'},
-  {id:'rec_eng11',name:'Английский язык. 11 класс (Spotlight)',className:'11 класс',author:'О. В. Афанасьева, Д. Дули, И. В. Михеева, Б. Оби, В. Эванс',
-   url:'https://share.google/6WhmHd6M84dPOdGHO',
-   matchAny:['english','английский','spotlight','starlight','rainbow','afanasyeva','афанасьева','mikheeva','михеева','vaulina','ваулина','kuzovlev','кузовлев','evans','эванс','dooley','дули'],theme:'eng'},
-  {id:'rec_rus1011',name:'Русский язык. 10-11 класс',className:'10-11 класс',author:'В. Ф. Греков, С. Е. Крючков, Л. А. Чешко',
-   url:'https://share.google/ZBDp5uonlK2UUT2qc',
-   matchAny:['russkiy','русский','grekov','греков','kryuchkov','крючков','cheshko','чешко'],theme:'russian'},
-  {id:'rec_bio11',name:'Биология. 11 класс (базовый)',className:'11 класс',author:'В. В. Пасечник, А. А. Каменский, А. М. Рубцов',
-   url:'https://so.11klasov.net/index.php?do=download&id=26284',
-   matchAny:['биология','biologiya','biology','pasechnik','пасечник','kamensky','каменский','rubtsov','рубцов'],theme:'bio'},
-  {id:'rec_bio11_prof',name:'Биология. 11 класс (углублённый)',className:'11 класс',author:'В. В. Пасечник, А. А. Каменский, А. М. Рубцов',
-   url:'https://so.11klasov.net/index.php?do=download&id=26328',
-   matchAny:['биология углубленный','биология профиль','biologiya uglublenny','biology advanced'],theme:'bio-pro'},
-  {id:'rec_geo11',name:'География. 11 класс (Полярная звезда)',className:'11 класс',author:'Ю. Н. Гладкий, В. В. Николина',
-   url:'https://share.google/1F6fIuFWkL5AhfSlA',
-   matchAny:['география','geografiya','geography','gladkiy','гладкий','nikolina','николина','polyarnaya','полярная'],theme:'geo'}
-];
-function normMatch(s){return String(s||'').toLowerCase().replace(/\.pdf$/i,'').replace(/[^a-zа-яё0-9]+/gi,'')}
-function findMatchingSaved(books,rec){
-  const terms=(rec.matchAny||[]).map(normMatch).filter(Boolean);
-  if(!terms.length)return null;
-  for(const b of books){const n=normMatch(b.name);if(terms.some(t=>n.includes(t)))return b}return null;
-}
-function phClass(rec){
-  const map={soc:'soc',phys:'physics',eng:'english',russian:'russian',bio:'bio','bio-pro':'bio-pro',geo:'geo'};
-  return map[rec.theme] || 'rec';
-}
-
 /* ===== PWA ===== */
 let deferredPrompt=null;const btnInstall=document.getElementById('btnInstall');
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;btnInstall.style.display='grid'});
@@ -735,7 +749,6 @@ function updateHeader(){
   const b=document.getElementById('btnBack');const t=document.getElementById('brandTitle');const s=document.getElementById('brandSub');
   const map={
     home:['Книги','читайте и листайте учебники'],
-    rec:['Рекомендуемые','подобраны для вас'],
     mine:['Мои книги','личная библиотека'],
     bookmarks:['Закладки','сохранённые страницы'],
     search:['Поиск','по названию и автору'],
@@ -749,12 +762,11 @@ document.getElementById('btnBack').addEventListener('click',()=>{if(currentScree
 document.querySelectorAll('.tile').forEach(t=>{
   t.addEventListener('click',()=>{
     const g=t.dataset.target;
-    if(g==='rec')showScreen('rec');
-    else if(g==='mine')showScreen('mine');
+    if(g==='mine')showScreen('mine');
     else if(g==='bookmarks')showScreen('bookmarks');
   });
 });
-document.getElementById('btnAddMine').addEventListener('click',()=>{pendingPresetForPick=null;fileInput.click()});
+document.getElementById('btnAddMine').addEventListener('click',()=>{fileInput.click()});
 
 /* ===== SETTINGS POPOVER ===== */
 const settingsPop=document.getElementById('settingsPop');
@@ -809,65 +821,13 @@ document.getElementById('importInput').onchange=async e=>{
 };
 
 /* ===== RENDER ===== */
-const PRESET_SVG=`<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fill="none">
-  <path d="M256 140 C230 120 180 118 130 132 L130 372 C180 358 230 362 256 380 Z" fill="#ffffff" opacity="0.95"/>
-  <path d="M256 140 C282 120 332 118 382 132 L382 372 C332 358 282 362 256 380 Z" fill="#ffffff" opacity="0.8"/>
-  <line x1="160" y1="200" x2="230" y2="196" stroke="#000" stroke-width="8" stroke-linecap="round" opacity="0.2"/>
-  <line x1="160" y1="232" x2="230" y2="228" stroke="#000" stroke-width="8" stroke-linecap="round" opacity="0.2"/>
-  <line x1="282" y1="196" x2="352" y2="200" stroke="#000" stroke-width="8" stroke-linecap="round" opacity="0.15"/>
-  <line x1="282" y1="228" x2="352" y2="232" stroke="#000" stroke-width="8" stroke-linecap="round" opacity="0.15"/>
-</svg>`;
-
 async function renderAll(){
   const books=await dbGetAll();
-  renderHome(books);renderRecScreen(books);renderMineScreen(books);renderBookmarksScreen(books);
+  renderHome(books);renderMineScreen(books);renderBookmarksScreen(books);
 }
 function renderHome(books){
-  document.getElementById('tileRecCount').textContent=REC_BOOKS.length;
   document.getElementById('tileMineCount').textContent=books.length;
   document.getElementById('tileBmCount').textContent=getAllBookmarksFlat().length;
-}
-
-const gridRec=document.getElementById('gridRec');
-const recCountEl=document.getElementById('recCount');
-function renderRecScreen(books){
-  gridRec.innerHTML='';recCountEl.textContent=REC_BOOKS.length;
-  const sorted=[...REC_BOOKS];
-  if(settings.sort==='alpha')sorted.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ru',{sensitivity:'base'}));
-  for(const rec of sorted){const m=findMatchingSaved(books,rec);renderRecCard(rec,m)}
-}
-function renderRecCard(rec,matched){
-  const card=document.createElement('div');
-  card.className='card rec'+(matched?' matched':'');
-  const ph=phClass(rec);
-  const cover=matched&&matched.thumb?`<img src="${matched.thumb}" alt="">`:`<div class="placeholder-cover ${ph}">${PRESET_SVG}</div>`;
-  const badge=matched?`<div class="badge ok">✓ В БИБЛИОТЕКЕ</div>`:`<div class="badge rec">РЕКОМЕНДУЕМ</div>`;
-  const authorLine=(matched&&matched.author)||rec.author||'';
-  const meta=[authorLine,rec.className].filter(Boolean).join(' · ');
-  const hint=matched
-    ?`<div class="hint ok">✓ Учебник уже в «Моих книгах»</div>`
-    :`<div class="hint rec">Выберите файл на устройстве или скачайте по кнопке ниже.</div>`;
-  let actions;
-  if(matched){
-    actions=`<button class="btn ok" data-act="open">Читать</button><button class="icon-btn" data-act="delete" title="Удалить навсегда">🗑</button>`;
-  }else{
-    actions=`<button class="btn" data-act="pick">📁 Найти в файлах</button><button class="icon-btn" data-act="download" title="Скачать PDF">⬇</button>`;
-  }
-  card.innerHTML=`
-    <div class="cover" data-cover><div class="spine ${matched?'ok':'rec'}"></div>${cover}${badge}
-      <div class="overlay">${matched?'Читать →':'Найти файл →'}</div></div>
-    <div class="card-body"><h3>${esc(rec.name)}</h3>
-      <div class="meta">${esc(meta)}</div>${hint}
-      <div class="card-actions">${actions}</div></div>`;
-  card.querySelector('[data-cover]').onclick=()=>{matched?openBook(matched.id):pickFileForPreset(rec)};
-  if(matched){
-    card.querySelector('[data-act="open"]').onclick=()=>openBook(matched.id);
-    card.querySelector('[data-act="delete"]').onclick=()=>deleteBookEverywhere(matched,rec);
-  }else{
-    card.querySelector('[data-act="pick"]').onclick=()=>pickFileForPreset(rec);
-    card.querySelector('[data-act="download"]').onclick=()=>downloadRec(rec);
-  }
-  gridRec.appendChild(card);
 }
 
 const gridMine=document.getElementById('gridMine');
@@ -881,8 +841,8 @@ function renderMineScreen(books){
   for(const b of sorted)renderSavedBook(b);
   const add=document.createElement('button');
   add.className='add-card';
-  add.innerHTML=`<div class="plus">＋</div><div class="t">Добавить PDF</div><div class="s">или перетащите файл</div>`;
-  add.onclick=()=>{pendingPresetForPick=null;fileInput.click()};
+  add.innerHTML=`<div class="plus">＋</div><div class="t">Добавить PDF или ZIP</div><div class="s">или перетащите файлы</div>`;
+  add.onclick=()=>{fileInput.click()};
   gridMine.appendChild(add);
 }
 function renderSavedBook(b){
@@ -906,7 +866,7 @@ function renderSavedBook(b){
       </div></div>`;
   card.querySelector('[data-cover]').onclick=()=>openBook(b.id);
   card.querySelector('[data-act="open"]').onclick=()=>openBook(b.id);
-  card.querySelector('[data-act="delete"]').onclick=()=>deleteBookEverywhere(b,null);
+  card.querySelector('[data-act="delete"]').onclick=()=>deleteBookEverywhere(b);
   gridMine.appendChild(card);
 }
 
@@ -916,7 +876,7 @@ async function renderBookmarksScreen(books){
   const flat=getAllBookmarksFlat();
   bmCountEl.textContent=flat.length;gridBm.innerHTML='';
   if(!flat.length){
-    gridBm.innerHTML=`<div class="section-empty">Пока нет закладок.<br>Откройте книгу и нажмите 🔖 в шапке читалки.</div>`;
+    gridBm.innerHTML=`<div class="section-empty">Пока нет закладок.<br>Откройте книгу и нажмите 🔖 в меню читалки.</div>`;
     return;
   }
   const byId={};for(const b of books)byId[b.id]=b;
@@ -945,9 +905,8 @@ async function renderBookmarksScreen(books){
 }
 
 /* ===== DELETE BOOK ===== */
-async function deleteBookEverywhere(book, rec){
-  const bookName = book.name || (rec && rec.name) || 'книга';
-  if (!confirm('Удалить «'+bookName+'»?\n\nКнига будет удалена из приложения'+(book.fileHandle?' и с устройства':'')+'.')) return;
+async function deleteBookEverywhere(book){
+  if (!confirm('Удалить «'+book.name+'»?\n\nКнига будет удалена из приложения'+(book.fileHandle?' и с устройства':'')+'.')) return;
   let fileDeleted = false;let fileNote = '';
   if (book.fileHandle){
     try{
@@ -971,56 +930,78 @@ async function deleteBookEverywhere(book, rec){
   else toast('Удалено из приложения. '+fileNote, 4200);
 }
 
-/* ===== PICK FILE FOR PRESET ===== */
-let pendingPresetForPick = null;
+/* ===== FILE INPUT / ZIP ===== */
+const fileInput=document.getElementById('fileInput');
 
-async function pickFileForPreset(rec){
-  pendingPresetForPick = rec;
-  if ('showOpenFilePicker' in window){
-    try{
-      const [handle] = await window.showOpenFilePicker({
-        types: [{description:'PDF-файл', accept:{'application/pdf':['.pdf']}}], multiple: false
-      });
-      const file = await handle.getFile();
-      if (file) await addFile(file, rec, handle);
-      pendingPresetForPick = null;return;
-    }catch(e){
-      if (e.name === 'AbortError'){ pendingPresetForPick = null; return; }
-      console.warn('showOpenFilePicker failed, fallback:', e);
-    }
-  }
-  fileInput.click();
+function isZipFile(file){
+  return /\.zip$/i.test(file.name) ||
+         file.type==='application/zip' ||
+         file.type==='application/x-zip-compressed';
 }
 
 fileInput.onchange = async (e)=>{
   const files=[...e.target.files];fileInput.value='';
-  const rec = pendingPresetForPick;pendingPresetForPick = null;
-  for (const f of files) await addFile(f, rec);
+  for (const f of files) await addFile(f);
 };
 
-/* ===== DOWNLOAD REC ===== */
-async function downloadRec(rec){
-  toast('Пытаюсь скачать автоматически…',4000);
+async function addFile(file){
+  if(isZipFile(file)){await processZip(file);return}
+  if(!/\.pdf$/i.test(file.name)&&file.type!=='application/pdf'){toast('Только PDF или ZIP: '+file.name);return}
+  await addPdf(file);
+}
+
+async function addPdf(file){
+  toast('Обрабатываю: '+file.name,3000);
   try{
-    const resp=await fetch(rec.url,{mode:'cors',redirect:'follow'});
-    if(!resp.ok)throw new Error('HTTP '+resp.status);
-    const blob=await resp.blob();
-    if(blob.size<1000)throw new Error('файл слишком мал');
-    const ab=await blob.arrayBuffer();
-    const head=new Uint8Array(ab.slice(0,5));
-    if(!(head[0]===0x25&&head[1]===0x50&&head[2]===0x44&&head[3]===0x46))throw new Error('не PDF');
-    await saveAbAsBook(ab, rec.name, null);
-    sndAdd();toast('Скачано и добавлено в «Мои книги» ✅',3000);renderAll();
+    const data=await file.arrayBuffer();
+    const cleanName=file.name.replace(/\.pdf$/i,'');
+    await saveAbAsBook(data, cleanName, null);
+    sndAdd();
+    toast('Книга добавлена: '+cleanName, 2600);
+    renderAll();showScreen('mine');
+  }catch(err){console.error(err);toast('Ошибка: '+(err.message||err))}
+}
+
+async function processZip(file){
+  if(!window.fflate){toast('Модуль ZIP не загружен. Проверьте интернет.');return}
+  if(!confirm('Импортировать все PDF из архива «'+file.name+'»?\n\nОни добавятся в «Мои книги».')) return;
+  toast('Распаковываю…', 6000);
+  try{
+    const buf=new Uint8Array(await file.arrayBuffer());
+    const entries=fflate.unzipSync(buf);
+    const pdfs=[];
+    for(const [path,data] of Object.entries(entries)){
+      if(path.endsWith('/'))continue;
+      if(path.startsWith('__MACOSX/'))continue;
+      const base=path.split('/').pop()||'';
+      if(!base||base.startsWith('.'))continue;
+      if(!/\.pdf$/i.test(base))continue;
+      pdfs.push({name:base.replace(/\.pdf$/i,''),data});
+    }
+    if(!pdfs.length){toast('В архиве нет PDF-файлов');return}
+    let ok=0,fail=0;
+    for(let i=0;i<pdfs.length;i++){
+      const f=pdfs[i];
+      toast(`Обрабатываю ${i+1} из ${pdfs.length}: ${f.name.slice(0,28)}…`, 2500);
+      await new Promise(r=>setTimeout(r,40));
+      try{
+        const slice=f.data.buffer.slice(f.data.byteOffset, f.data.byteOffset+f.data.byteLength);
+        await saveAbAsBook(slice, f.name, null);
+        ok++;
+      }catch(err){console.warn('Skip',f.name,err);fail++}
+    }
+    sndAdd();
+    toast(`Импортировано: ${ok}${fail?`, пропущено: ${fail}`:''} из ${pdfs.length}`, 4000);
+    renderAll();showScreen('mine');
   }catch(err){
-    console.warn(err);
-    const open=confirm('Автоматически скачать не удалось.\n\nОткрыть ссылку в браузере, чтобы скачать вручную?\n\nПотом нажмите «📁 Найти в файлах» на этой карточке.');
-    if(open)window.open(rec.url,'_blank');
+    console.error(err);
+    toast('Не удалось прочитать архив: '+(err.message||err), 4000);
   }
 }
 
 /* ===== SAVE BOOK ===== */
 async function saveAbAsBook(ab, name, fileHandle){
-  const pdf=await pdfjsLib.getDocument({data:ab.slice(0)}).promise;
+  const pdf=await pdfjsLib.getDocument({data:ab.slice?ab.slice(0):ab}).promise;
   const page=await pdf.getPage(1);
   const base=page.getViewport({scale:1});
   const vp=page.getViewport({scale:500/base.width});
@@ -1033,87 +1014,59 @@ async function saveAbAsBook(ab, name, fileHandle){
     const meta=await pdf.getMetadata();author=(meta?.info?.Author||'').trim();
     if(author.length>200)author='';
   }catch(e){}
+  const size=ab.byteLength||0;
   const book={
     id:'b_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
-    name, author, size:ab.byteLength, pages:pdf.numPages,
+    name, author, size,
+    pages:pdf.numPages,
     thumb, data:ab, fileHandle: fileHandle || null,
     addedAt: Date.now(), lastPage: 1
   };
   await dbPut(book);return book;
 }
 
-async function addFile(file, recContext = null, fileHandle = null){
-  if(!/\.pdf$/i.test(file.name)&&file.type!=='application/pdf'){toast('Не PDF: '+file.name);return}
-  toast('Обрабатываю: '+file.name,3000);
-  try{
-    const data = await file.arrayBuffer();
-    const cleanName = file.name.replace(/\.pdf$/i,'');
-    const matchedRec = recContext || REC_BOOKS.find(r=>{
-      const t=(r.matchAny||[]).map(normMatch);const n=normMatch(cleanName);
-      return t.some(x=>n.includes(x));
-    });
-    const nameToSave = matchedRec ? matchedRec.name : cleanName;
-    await saveAbAsBook(data, nameToSave, fileHandle);
-    sndAdd();
-    toast(matchedRec ? '«'+matchedRec.name+'» добавлена в «Мои книги» ✅' : 'Книга добавлена: '+cleanName, 3200);
-    renderAll();showScreen('mine');
-  }catch(err){console.error(err);toast('Ошибка: '+(err.message||err))}
-}
-
+/* ===== DRAG & DROP ===== */
 const dropOverlay=document.getElementById('dropOverlay');let dragD=0;
 window.addEventListener('dragenter',e=>{if(![...e.dataTransfer.types].includes('Files'))return;e.preventDefault();dragD++;if(currentScreen!=='reader')dropOverlay.classList.add('on')});
 window.addEventListener('dragover',e=>{if([...e.dataTransfer.types].includes('Files'))e.preventDefault()});
 window.addEventListener('dragleave',()=>{dragD=Math.max(0,dragD-1);if(!dragD)dropOverlay.classList.remove('on')});
-window.addEventListener('drop',e=>{e.preventDefault();dragD=0;dropOverlay.classList.remove('on');if(currentScreen==='reader'||currentScreen==='rec')return;[...(e.dataTransfer?.files||[])].forEach(f=>addFile(f))});
+window.addEventListener('drop',e=>{
+  e.preventDefault();dragD=0;dropOverlay.classList.remove('on');
+  if(currentScreen==='reader')return;
+  [...(e.dataTransfer?.files||[])].forEach(f=>addFile(f));
+});
 
 /* ===== SEARCH ===== */
 const searchScreen=document.createElement('section');
 searchScreen.className='screen';searchScreen.id='screenSearch';
 searchScreen.innerHTML=`
-  <div class="hero"><h1>🔍 Поиск</h1><p>По названию, автору или классу.</p></div>
+  <div class="hero"><h1>🔍 Поиск</h1><p>По названию или автору.</p></div>
   <div class="grid-toolbar"><input class="search-input" id="searchInput" placeholder="Начните печатать…"></div>
   <div class="grid" id="gridSearch"></div>`;
 document.body.appendChild(searchScreen);
 document.getElementById('btnSearch').addEventListener('click',()=>{showScreen('search');setTimeout(()=>document.getElementById('searchInput').focus(),120)});
 document.getElementById('searchInput').addEventListener('input',async e=>{
   const q=e.target.value.trim().toLowerCase();
-  const grid=document.getElementById('gridSearch');if(!q){grid.innerHTML='';return}
-  const books=await dbGetAll();const items=[];
-  for(const b of books){const hay=((b.name||'')+' '+(b.author||'')).toLowerCase();if(hay.includes(q))items.push({kind:'book',b})}
-  for(const r of REC_BOOKS){
-    const hay=[r.name,r.author,r.className].filter(Boolean).join(' ').toLowerCase();
-    if(hay.includes(q)){const matched=findMatchingSaved(books,r);if(!items.some(it=>it.kind==='rec'&&it.r.id===r.id))items.push({kind:'rec',r,matched})}
-  }
+  const grid=document.getElementById('gridSearch');
+  if(!q){grid.innerHTML='';return}
+  const books=await dbGetAll();
+  const matched=books.filter(b=>{
+    const hay=((b.name||'')+' '+(b.author||'')).toLowerCase();
+    return hay.includes(q);
+  });
   grid.innerHTML='';
-  if(!items.length){grid.innerHTML=`<div class="section-empty">Ничего не найдено.</div>`;return}
-  for(const it of items){
-    if(it.kind==='book'){
-      const b=it.b;const card=document.createElement('div');card.className='card';
-      card.innerHTML=`
-        <div class="cover"><div class="spine"></div>${b.thumb?`<img src="${b.thumb}" alt="">`:''}
-          <div class="overlay">Открыть →</div></div>
-        <div class="card-body"><h3>${esc(b.name)}</h3>
-          <div class="meta">${esc([b.author,b.pages+' стр.'].filter(Boolean).join(' · '))}</div>
-          <div class="card-actions"><button class="btn" data-act="open">Читать</button></div></div>`;
-      card.querySelector('[data-act="open"]').onclick=()=>openBook(b.id);
-      card.querySelector('.cover').onclick=()=>openBook(b.id);
-      grid.appendChild(card);
-    }else{
-      const r=it.r;const m=it.matched;const card=document.createElement('div');
-      card.className='card rec'+(m?' matched':'');
-      const coverInner = m&&m.thumb?`<img src="${m.thumb}" alt="">`:`<div class="placeholder-cover ${phClass(r)}">${PRESET_SVG}</div>`;
-      const actions = m?`<button class="btn ok" data-act="open">Читать</button>`:`<button class="btn" data-act="pick">📁 Найти</button>`;
-      card.innerHTML=`
-        <div class="cover"><div class="spine ${m?'ok':'rec'}"></div>${coverInner}
-          <div class="badge rec">РЕКОМЕНДУЕМ</div>
-          <div class="overlay">${m?'Читать →':'Найти →'}</div></div>
-        <div class="card-body"><h3>${esc(r.name)}</h3>
-          <div class="meta">${esc([(m&&m.author)||r.author||'',r.className].filter(Boolean).join(' · '))}</div>
-          <div class="card-actions">${actions}</div></div>`;
-      if(m){card.querySelector('[data-act="open"]').onclick=()=>openBook(m.id);card.querySelector('.cover').onclick=()=>openBook(m.id)}
-      else{card.querySelector('[data-act="pick"]').onclick=()=>pickFileForPreset(r);card.querySelector('.cover').onclick=()=>pickFileForPreset(r)}
-      grid.appendChild(card);
-    }
+  if(!matched.length){grid.innerHTML=`<div class="section-empty">Ничего не найдено.</div>`;return}
+  for(const b of matched){
+    const card=document.createElement('div');card.className='card';
+    card.innerHTML=`
+      <div class="cover"><div class="spine"></div>${b.thumb?`<img src="${b.thumb}" alt="">`:''}
+        <div class="overlay">Открыть →</div></div>
+      <div class="card-body"><h3>${esc(b.name)}</h3>
+        <div class="meta">${esc([b.author,b.pages+' стр.'].filter(Boolean).join(' · '))}</div>
+        <div class="card-actions"><button class="btn" data-act="open">Читать</button></div></div>`;
+    card.querySelector('[data-act="open"]').onclick=()=>openBook(b.id);
+    card.querySelector('.cover').onclick=()=>openBook(b.id);
+    grid.appendChild(card);
   }
 });
 
@@ -1142,7 +1095,6 @@ function virtualTotal(){if(!state.pdf)return 1;return isSkip()?Math.max(1,state.
 function realMin(){return isSkip()?2:1}
 function effectiveStep(){return settings.twoPage&&window.innerWidth>820?2:1}
 
-/* --- Зум --- */
 function applyTransform(){
   if(state.zoom===1&&state.panX===0&&state.panY===0){
     els.wrap.style.transform='';
@@ -1181,7 +1133,7 @@ function updatePageUI(){
   els.next.disabled=state.page>=state.pdf.numPages;
   els.zonePrev.disabled=els.prev.disabled;els.zoneNext.disabled=els.next.disabled;
   document.getElementById('rSub').textContent=vt+' стр.';
-  document.getElementById('btnBookmark').classList.toggle('on',isBookmarked(state.book.id,state.page));
+  document.getElementById('rmBookmark').classList.toggle('active',isBookmarked(state.book.id,state.page));
 }
 async function openBook(id){
   const b=await dbGet(id);if(!b){toast('Не найдена');return}
@@ -1192,7 +1144,7 @@ async function openBook(id){
   catch(e){console.error(e);toast('Ошибка');hideLoading();return}
   state.page=Math.min(Math.max(1,b.lastPage||1),state.pdf.numPages);
   if(isSkip()&&state.page===1&&state.pdf.numPages>1)state.page=2;
-  resetZoom();
+  resetZoom();closeReaderMenu();
   document.getElementById('rTitle').textContent=b.name;
   document.querySelector('header').style.display='none';
   showScreen('reader');
@@ -1204,7 +1156,7 @@ async function openBookAt(id,page){
 }
 function closeReader(){
   if(state.book&&state.page){dbGet(state.book.id).then(b=>{if(b){b.lastPage=state.page;dbPut(b)}})}
-  resetZoom();closeThumbs();sndClose();
+  resetZoom();closeThumbs();closeReaderMenu();sndClose();
   state.pdf=null;state.book=null;state.thumbCache={};
   document.querySelector('header').style.display='flex';
   showScreen(lastScreenBeforeReader||'mine');
@@ -1299,7 +1251,36 @@ els.pageInput.onchange=e=>{let v=+e.target.value.replace(/\D/g,'');if(!v){e.targ
   const vt=virtualTotal();v=Math.max(1,Math.min(vt,v));goToPage(virtualToReal(v))};
 els.pageInput.onkeydown=e=>{if(e.key==='Enter')e.target.blur()};
 
+/* ===== Reader Menu ===== */
+const readerMenu=document.getElementById('readerMenu');
+const btnReaderMenu=document.getElementById('btnReaderMenu');
+function openReaderMenu(){readerMenu.classList.add('open')}
+function closeReaderMenu(){readerMenu.classList.remove('open')}
+btnReaderMenu.addEventListener('click',e=>{
+  e.stopPropagation();
+  readerMenu.classList.contains('open')?closeReaderMenu():openReaderMenu();
+});
+document.addEventListener('click',e=>{
+  if(!readerMenu.classList.contains('open'))return;
+  if(readerMenu.contains(e.target)||btnReaderMenu.contains(e.target))return;
+  closeReaderMenu();
+});
+document.getElementById('rmZoomIn').onclick=()=>zoomCenter(1.25);
+document.getElementById('rmZoomOut').onclick=()=>zoomCenter(1/1.25);
+document.getElementById('rmZoomFit').onclick=()=>resetZoom();
+document.getElementById('rmGrid').onclick=()=>{closeReaderMenu();openThumbs()};
+document.getElementById('rmBookmark').addEventListener('click',()=>{
+  if(!state.book)return;
+  closeReaderMenu();
+  const page=state.page;const existing=isBookmarked(state.book.id,page);
+  document.getElementById('bmNote').value=existing?getBookmarkNote(state.book.id,page):'';
+  document.getElementById('bmDelete').style.display=existing?'inline-flex':'none';
+  document.getElementById('bmSave').textContent=existing?'Обновить':'Сохранить';
+  bookmarkModal.classList.add('open');setTimeout(()=>document.getElementById('bmNote').focus(),100);
+});
+
 document.addEventListener('keydown',e=>{
+  if(readerMenu.classList.contains('open')){if(e.key==='Escape'){closeReaderMenu();return}}
   if(bookmarkModal.classList.contains('open')){if(e.key==='Escape')bookmarkModal.classList.remove('open');return}
   if(settingsPop.classList.contains('open')){if(e.key==='Escape')closeSettings();return}
   if(thumbsModal.classList.contains('open')){if(e.key==='Escape')closeThumbs();return}
@@ -1378,12 +1359,8 @@ els.stage.addEventListener('touchmove',e=>{
 },{passive:false});
 
 els.stage.addEventListener('touchend',e=>{
-  if(touchState.mode==='pinch'&&e.touches.length<2){
-    touchState.mode=null;return;
-  }
-  if(touchState.mode==='pan'&&e.touches.length===0){
-    touchState.mode=null;return;
-  }
+  if(touchState.mode==='pinch'&&e.touches.length<2){touchState.mode=null;return}
+  if(touchState.mode==='pan'&&e.touches.length===0){touchState.mode=null;return}
   if(touchState.mode==='swipe'&&e.touches.length===0){
     const t=e.changedTouches[0];
     const dx=t.clientX-touchState.startX;
@@ -1397,22 +1374,10 @@ els.stage.addEventListener('touchend',e=>{
 
 els.stage.addEventListener('touchcancel',()=>{touchState.mode=null});
 
-document.getElementById('zoomIn').onclick=()=>zoomCenter(1.25);
-document.getElementById('zoomOut').onclick=()=>zoomCenter(1/1.25);
-document.getElementById('zoomFit').onclick=resetZoom;
-
 let resizeT;window.addEventListener('resize',()=>{if(currentScreen!=='reader')return;clearTimeout(resizeT);resizeT=setTimeout(()=>{resetZoom();renderPage()},140)});
 
-/* ===== BOOKMARK BUTTON ===== */
+/* ===== BOOKMARK MODAL ===== */
 const bookmarkModal=document.getElementById('bookmarkModal');
-document.getElementById('btnBookmark').addEventListener('click',()=>{
-  if(!state.book)return;
-  const page=state.page;const existing=isBookmarked(state.book.id,page);
-  document.getElementById('bmNote').value=existing?getBookmarkNote(state.book.id,page):'';
-  document.getElementById('bmDelete').style.display=existing?'inline-flex':'none';
-  document.getElementById('bmSave').textContent=existing?'Обновить':'Сохранить';
-  bookmarkModal.classList.add('open');setTimeout(()=>document.getElementById('bmNote').focus(),100);
-});
 document.getElementById('bmCancel').onclick=()=>bookmarkModal.classList.remove('open');
 bookmarkModal.addEventListener('click',e=>{if(e.target===bookmarkModal)bookmarkModal.classList.remove('open')});
 document.getElementById('bmSave').onclick=()=>{
@@ -1424,14 +1389,14 @@ document.getElementById('bmSave').onclick=()=>{
   if(idx>=0)all[state.book.id][idx].note=note;
   else all[state.book.id].push({page:state.page,note,date:Date.now()});
   saveBookmarks(all);bookmarkModal.classList.remove('open');
-  document.getElementById('btnBookmark').classList.add('on');
+  document.getElementById('rmBookmark').classList.add('active');
   toast('Закладка сохранена 🔖');
 };
 document.getElementById('bmDelete').onclick=()=>{
   if(!state.book)return;
   removeBookmark(state.book.id,state.page);
   bookmarkModal.classList.remove('open');
-  document.getElementById('btnBookmark').classList.remove('on');
+  document.getElementById('rmBookmark').classList.remove('active');
   toast('Закладка удалена');
 };
 
@@ -1488,7 +1453,6 @@ async function renderThumb(card,pageNum){
   }catch(e){console.warn(e)}
 }
 function closeThumbs(){thumbsModal.classList.remove('open');if(thumbsObserver){thumbsObserver.disconnect();thumbsObserver=null}thumbsGrid.innerHTML=''}
-document.getElementById('btnGrid').onclick=openThumbs;
 document.getElementById('thumbsClose').onclick=closeThumbs;
 thumbsModal.addEventListener('click',e=>{if(e.target===thumbsModal)closeThumbs()});
 const origGoToPage=goToPage;
